@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Сальдо — личный кабинет учёта ДС</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=20260813r" />
+</head>
+<body>
+  <!-- LOGIN -->
+  <div id="screen-login" class="login-screen">
+    <div class="login-bg" aria-hidden="true"></div>
+    <div class="login-card">
+      <div class="login-brand">
+        <div class="logo-mark" aria-hidden="true">
+          <svg class="logo-svg" viewBox="0 0 48 48" fill="none">
+            <defs>
+              <linearGradient id="saldoGrad" x1="8" y1="6" x2="42" y2="44" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#6AAD86"/>
+                <stop offset="1" stop-color="#2F5D48"/>
+              </linearGradient>
+            </defs>
+            <rect x="2" y="2" width="44" height="44" rx="14" fill="url(#saldoGrad)"/>
+            <!-- wallet + coin: учёт денежных средств -->
+            <path d="M13 19.5c0-1.7 1.3-3 3-3h16c1.7 0 3 1.3 3 3V33c0 1.7-1.3 3-3 3H16c-1.7 0-3-1.3-3-3V19.5Z" stroke="#fff" stroke-width="2.2" stroke-linejoin="round"/>
+            <path d="M13 22h22" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M32 25.5h3.5c1.4 0 2.5 1.1 2.5 2.5v1c0 1.4-1.1 2.5-2.5 2.5H32" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="20.5" cy="29" r="3.4" stroke="#fff" stroke-width="2"/>
+            <path d="M20.5 27.2v3.6M19 29h3" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-name">Сальдо</h1>
+          <p class="brand-tag">Учёт денежных средств</p>
+        </div>
+      </div>
+      <p class="login-lead">Войдите с учётными данными, выданными администратором.</p>
+      <form id="login-form" class="login-form">
+        <label class="field">
+          <span>E-mail</span>
+          <input type="email" id="login-email" value="admin@example.com" required autocomplete="username" />
+        </label>
+        <label class="field">
+          <span>Пароль</span>
+          <input type="password" id="login-password" value="demo" required autocomplete="current-password" />
+        </label>
+        <p class="login-hint">Самостоятельная регистрация и восстановление пароля недоступны. При утере пароля обратитесь к администратору.</p>
+        <button type="submit" class="btn btn-primary btn-block">Войти</button>
+      </form>
+      <div class="demo-switch">
+        <span>Демо-вход:</span>
+        <button type="button" class="chip" data-demo="admin">Администратор</button>
+        <button type="button" class="chip" data-demo="user">Пользователь</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- APP SHELL -->
+  <div id="screen-app" class="app hidden" aria-hidden="true">
+    <aside class="sidebar">
+      <button type="button" class="sidebar-brand" id="brand-home" title="На главную" aria-label="На главную">
+        <div class="logo-mark sm" aria-hidden="true">
+          <svg class="logo-svg" viewBox="0 0 48 48" fill="none">
+            <defs>
+              <linearGradient id="saldoGradSide" x1="8" y1="6" x2="42" y2="44" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#6AAD86"/>
+                <stop offset="1" stop-color="#2F5D48"/>
+              </linearGradient>
+            </defs>
+            <rect x="2" y="2" width="44" height="44" rx="14" fill="url(#saldoGradSide)"/>
+            <path d="M13 19.5c0-1.7 1.3-3 3-3h16c1.7 0 3 1.3 3 3V33c0 1.7-1.3 3-3 3H16c-1.7 0-3-1.3-3-3V19.5Z" stroke="#fff" stroke-width="2.2" stroke-linejoin="round"/>
+            <path d="M13 22h22" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M32 25.5h3.5c1.4 0 2.5 1.1 2.5 2.5v1c0 1.4-1.1 2.5-2.5 2.5H32" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="20.5" cy="29" r="3.4" stroke="#fff" stroke-width="2"/>
+            <path d="M20.5 27.2v3.6M19 29h3" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-name">Сальдо</div>
+          <div class="brand-tag">Учёт ДС</div>
+        </div>
+      </button>
+
+      <nav class="nav" id="nav-main"></nav>
+    </aside>
+
+    <div class="main-wrap">
+      <header class="topbar">
+        <div class="topbar-left">
+          <h2 class="page-title" id="page-title">Главная</h2>
+        </div>
+        <div class="topbar-user" id="topbar-user" title="Учётная запись">
+          <div class="avatar" id="user-avatar" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" fill="currentColor"/><path d="M5 19.5c1.5-3.5 4-5 7-5s5.5 1.5 7 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </div>
+          <div class="user-meta">
+            <div class="user-name" id="user-name">—</div>
+            <div class="user-role" id="user-role">—</div>
+          </div>
+          <button type="button" class="btn-ghost" id="btn-logout" title="Выйти">Выйти</button>
+        </div>
+      </header>
+
+      <main class="content" id="content"></main>
+    </div>
+  </div>
+
+  <script src="app.js?v=20260813u"></script>
+</body>
+</html>
