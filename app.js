@@ -1078,8 +1078,10 @@ function renderIssues() {
         <option value="all" selected>Все назначения</option>
         ${purposes.map((p) => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join("")}
       </select>
-      <button type="button" class="btn btn-secondary btn-sm filters-reset" id="issue-clear-filters">Снять все фильтры</button>
-      <button type="button" class="btn btn-primary btn-sm" id="btn-new-issue">Создать выдачу</button>
+      <div class="filters-actions">
+        <button type="button" class="btn btn-secondary btn-sm filters-reset" id="issue-clear-filters">Снять все фильтры</button>
+        <button type="button" class="btn btn-primary btn-sm" id="btn-new-issue">Создать выдачу</button>
+      </div>
     </div>
     <div class="table-wrap">
       <table class="data">
@@ -1407,8 +1409,10 @@ function renderReceipts() {
         <option value="all" selected>Все назначения</option>
         ${purposes.map((p) => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join("")}
       </select>
-      <button type="button" class="btn btn-secondary btn-sm filters-reset" id="receipt-clear-filters">Снять все фильтры</button>
-      <button type="button" class="btn btn-primary btn-sm" id="btn-new-receipt">Зафиксировать поступление</button>
+      <div class="filters-actions">
+        <button type="button" class="btn btn-secondary btn-sm filters-reset" id="receipt-clear-filters">Снять все фильтры</button>
+        <button type="button" class="btn btn-primary btn-sm" id="btn-new-receipt">Зафиксировать поступление</button>
+      </div>
     </div>
     <div class="table-wrap">
       <table class="data">
@@ -2537,8 +2541,10 @@ function renderMyIncome() {
         <option value="all" selected>Все источники</option>
         ${sources.map((s) => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join("")}
       </select>
-      <button type="button" class="btn btn-secondary btn-sm filters-reset" id="income-clear-filters">Снять все фильтры</button>
-      <button type="button" class="btn btn-primary btn-sm" id="btn-new-income">Записать доход</button>
+      <div class="filters-actions">
+        <button type="button" class="btn btn-secondary btn-sm filters-reset" id="income-clear-filters">Снять все фильтры</button>
+        <button type="button" class="btn btn-primary btn-sm" id="btn-new-income">Записать доход</button>
+      </div>
     </div>
     <div class="table-wrap">
       <table class="data">

@@ -495,6 +495,9 @@ textarea {
 .content {
   padding: 8px 28px 40px;
   animation: fade 0.25s ease;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
 }
 
 @keyframes fade {
@@ -795,25 +798,32 @@ button.card-link:hover {
 }
 
 .table-wrap {
-  overflow: auto;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: #fff;
   box-shadow: var(--shadow);
+  width: 100%;
+  max-width: 100%;
 }
 
 table.data {
   width: 100%;
+  max-width: 100%;
   border-collapse: collapse;
   font-size: 0.9rem;
 }
 
 table.data th,
 table.data td {
-  padding: 12px 14px;
+  padding: 12px 10px;
   text-align: left;
   border-bottom: 1px solid var(--line);
-  white-space: nowrap;
+  vertical-align: middle;
+  overflow-wrap: break-word;
+  word-break: normal;
+  white-space: normal;
 }
 
 table.data th {
@@ -822,6 +832,17 @@ table.data th {
   letter-spacing: 0.04em;
   color: var(--muted);
   background: var(--green-50);
+}
+
+table.data .money,
+table.data td.money {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+table.data .badge {
+  white-space: nowrap;
+  max-width: 100%;
 }
 
 table.data tr:last-child td {
@@ -834,6 +855,17 @@ table.data tbody tr {
 
 table.data tbody tr:hover {
   background: #f6faf7;
+}
+
+@media (max-width: 1100px) {
+  table.data {
+    font-size: 0.82rem;
+  }
+
+  table.data th,
+  table.data td {
+    padding: 10px 8px;
+  }
 }
 
 .badge {
@@ -915,20 +947,34 @@ table.data tbody tr:hover {
 }
 
 .filters-bar .filter-select {
-  flex: 0 1 auto;
-  min-width: 150px;
+  flex: 0 1 160px;
+  width: 160px;
+  min-width: 130px;
+  max-width: 170px;
 }
 
 .filters-bar .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 150px;
   white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.filters-actions {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
 .filters-reset {
   white-space: nowrap;
+}
+
+.filters-bar > .filters-reset {
   margin-left: auto;
 }
 
@@ -939,10 +985,13 @@ table.data tbody tr:hover {
   color: var(--muted);
   font-size: 0.85rem;
   font-weight: 600;
+  flex-shrink: 0;
 }
 
 .filter-date .filter-select {
-  min-width: 140px;
+  width: 140px;
+  min-width: 130px;
+  max-width: 150px;
   color: var(--text);
   font-weight: 600;
 }
