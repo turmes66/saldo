@@ -745,7 +745,7 @@ function renderAdminHome() {
       <div class="section-head">
         <h3><span class="icon">${icons.rocket}</span> Часто используемые разделы</h3>
       </div>
-      <div class="product-grid">
+      <div class="product-grid product-grid-3">
         <button type="button" class="product-card g1" data-go="issues">
           <span class="pc-icon">${icons.cash}</span>
           <strong>Выдача ДС</strong>
@@ -1062,7 +1062,7 @@ function renderIssues() {
   );
 
   els.content.innerHTML = `
-    <p class="section-note" style="margin-top:0">Удаление выдач не используется. Архивная выдача не входит в «получено / остаток», история сохраняется.</p>
+    <p class="section-note" style="margin-top:0">Архивная выдача не входит в «получено / остаток», история сохраняется.</p>
     <div class="filters-bar">
       <select id="issue-filter-recipient" class="filter-select" title="Получатель">
         <option value="all" selected>Все получатели</option>
@@ -2742,7 +2742,9 @@ function myReportCards(rows) {
       return `<div class="list-card report-card">
       <div>
         <h4>${r.title} <span style="color:var(--muted);font-weight:600">· ${r.id}</span></h4>
-        <p>${r.purpose || "—"} · ${r.company} · процедура: ${r.procedure} · ${r.date}</p>
+        <p>${r.purpose || "—"} · ${r.company} · процедура: ${r.procedure} · ${r.date}${
+          r.receipt?.dataUrl || r.receipt?.qr ? " · чек прикреплён" : ""
+        }</p>
         ${r.status === "На доработке" && r.reviewComment ? `<p class="rework-note">Замечание: ${r.reviewComment}</p>` : ""}
       </div>
       <div class="report-card-side">
@@ -2762,6 +2764,307 @@ function bindMyReportCards() {
 function applyFundUsage(sum, source) {
   // оставлено для совместимости: баланс теперь считается из отчётов
   syncIssueBalancesForUser(currentUserId());
+}
+
+const RECEIPT_MAX_BYTES = 3.5 * 1024 * 1024;
+
+function parseFiscalQr(raw) {
+  const text = String(raw || "").trim();
+  if (!text) return null;
+  try {
+    const query = text.includes("?") ? text.slice(text.indexOf("?") + 1) : text;
+    const params = new URLSearchParams(query);
+    const sumRaw = params.get("s");
+    const sum = sumRaw != null && sumRaw !== "" ? Number(String(sumRaw).replace(",", ".")) : null;
+    return {
+      raw: text,
+      sum: Number.isFinite(sum) ? sum : null,
+      paidAt: params.get("t") || null,
+      fn: params.get("fn") || null,
+      fd: params.get("i") || null,
+      fp: params.get("fp") || null,
+    };
+  } catch {
+    return { raw: text, sum: null, paidAt: null, fn: null, fd: null, fp: null };
+  }
+}
+
+function compressImageFile(file, maxSide = 1280, quality = 0.72) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(img.width * scale));
+        canvas.height = Math.max(1, Math.round(img.height * scale));
+        canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(url);
+        resolve(canvas.toDataURL("image/jpeg", quality));
+      } catch (err) {
+        URL.revokeObjectURL(url);
+        reject(err);
+      }
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("Не удалось прочитать изображение"));
+    };
+    img.src = url;
+  });
+}
+
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(new Error("Не удалось прочитать файл"));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function fileToReceiptAttachment(file) {
+  if (!file) return null;
+  if (file.size > RECEIPT_MAX_BYTES) {
+    throw new Error("Файл чека слишком большой. Максимум около 3,5 МБ.");
+  }
+  const isImage = String(file.type || "").startsWith("image/");
+  const dataUrl = isImage ? await compressImageFile(file) : await readFileAsDataUrl(file);
+  return {
+    name: file.name || (isImage ? "check.jpg" : "check.pdf"),
+    mime: isImage ? "image/jpeg" : file.type || "application/octet-stream",
+    dataUrl,
+    qr: null,
+    source: "upload",
+  };
+}
+
+function receiptAttachMarkup(existing) {
+  const has = Boolean(existing?.dataUrl || existing?.qr);
+  return `
+    <div class="field full receipt-attach" id="receipt-attach">
+      <span>Чек <em class="optional-mark">необязательно</em></span>
+      <p class="receipt-attach-hint">При желании прикрепите фото/PDF или считайте QR с кассового чека.</p>
+      <div class="receipt-attach-actions">
+        <button type="button" class="btn btn-secondary btn-sm" id="btn-receipt-upload">Загрузить файл</button>
+        <button type="button" class="btn btn-secondary btn-sm" id="btn-receipt-scan">Сканировать QR</button>
+        <input type="file" id="receipt-file" accept="image/*,application/pdf" hidden />
+      </div>
+      <div class="receipt-preview ${has ? "" : "hidden"}" id="receipt-preview">
+        <div class="receipt-preview-media" id="receipt-preview-media"></div>
+        <div class="receipt-preview-meta">
+          <div class="receipt-preview-name" id="receipt-preview-name"></div>
+          <div class="receipt-preview-qr muted-inline" id="receipt-preview-qr"></div>
+        </div>
+        <button type="button" class="btn btn-ghost btn-sm" id="btn-receipt-clear" title="Удалить чек">Удалить</button>
+      </div>
+      <div class="qr-scanner hidden" id="qr-scanner">
+        <video id="qr-video" playsinline muted></video>
+        <p class="receipt-attach-hint">Наведите камеру на QR-код чека</p>
+        <button type="button" class="btn btn-secondary btn-sm" id="btn-qr-cancel">Отменить сканирование</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderReceiptPreview(receipt) {
+  const box = document.getElementById("receipt-preview");
+  const media = document.getElementById("receipt-preview-media");
+  const nameEl = document.getElementById("receipt-preview-name");
+  const qrEl = document.getElementById("receipt-preview-qr");
+  if (!box || !media || !nameEl || !qrEl) return;
+
+  if (!receipt || (!receipt.dataUrl && !receipt.qr)) {
+    box.classList.add("hidden");
+    media.innerHTML = "";
+    nameEl.textContent = "";
+    qrEl.textContent = "";
+    return;
+  }
+
+  box.classList.remove("hidden");
+  nameEl.textContent = receipt.name || (receipt.qr ? "Чек по QR" : "Чек");
+  if (receipt.dataUrl && String(receipt.mime || "").startsWith("image/")) {
+    media.innerHTML = `<img src="${receipt.dataUrl}" alt="Чек" />`;
+  } else if (receipt.dataUrl) {
+    media.innerHTML = `<div class="receipt-file-chip">PDF</div>`;
+  } else {
+    media.innerHTML = `<div class="receipt-file-chip">QR</div>`;
+  }
+  qrEl.textContent = receipt.qr ? `QR: ${receipt.qr.length > 72 ? `${receipt.qr.slice(0, 72)}…` : receipt.qr}` : "";
+}
+
+function receiptViewMarkup(receipt) {
+  if (!receipt || (!receipt.dataUrl && !receipt.qr)) return "";
+  const media =
+    receipt.dataUrl && String(receipt.mime || "").startsWith("image/")
+      ? `<a class="receipt-view-link" href="${receipt.dataUrl}" target="_blank" rel="noopener"><img src="${receipt.dataUrl}" alt="Чек" /></a>`
+      : receipt.dataUrl
+        ? `<a class="receipt-view-link" href="${receipt.dataUrl}" target="_blank" rel="noopener">${escapeHtml(receipt.name || "Открыть файл чека")}</a>`
+        : "";
+  const qr = receipt.qr
+    ? `<div class="readonly receipt-qr-text">${escapeHtml(receipt.qr)}</div>`
+    : "";
+  return `<div class="field full"><span>Чек</span>
+    <div class="receipt-view">
+      ${media}
+      ${qr || (!media ? `<div class="readonly">${escapeHtml(receipt.name || "Прикреплён")}</div>` : "")}
+    </div>
+  </div>`;
+}
+
+function bindReceiptAttach({ initial = null, onChange } = {}) {
+  let receipt = initial && (initial.dataUrl || initial.qr) ? { ...initial } : null;
+  const fileInput = document.getElementById("receipt-file");
+  const scanner = document.getElementById("qr-scanner");
+  const video = document.getElementById("qr-video");
+  let stream = null;
+  let scanTimer = null;
+  let detecting = false;
+
+  const emit = () => {
+    renderReceiptPreview(receipt);
+    onChange?.(receipt);
+  };
+
+  const stopScanner = () => {
+    detecting = false;
+    if (scanTimer) {
+      clearTimeout(scanTimer);
+      scanTimer = null;
+    }
+    if (stream) {
+      stream.getTracks().forEach((t) => t.stop());
+      stream = null;
+    }
+    if (video) video.srcObject = null;
+    scanner?.classList.add("hidden");
+  };
+
+  const setReceipt = (next) => {
+    receipt = next;
+    emit();
+  };
+
+  const applyQrPayload = async (raw) => {
+    const parsed = parseFiscalQr(raw);
+    if (!parsed) return;
+    setReceipt({
+      name: receipt?.name || "Чек по QR",
+      mime: receipt?.mime || "text/plain",
+      dataUrl: receipt?.dataUrl || null,
+      qr: parsed.raw,
+      source: "qr",
+      fiscal: parsed,
+    });
+    stopScanner();
+    if (parsed.sum != null && parsed.sum > 0) {
+      const sumInput = document.querySelector('#report-form input[name="sum"]');
+      if (sumInput) {
+        const current = parseAmount(sumInput.value);
+        if (!Number.isFinite(current) || current <= 0 || Math.abs(current - parsed.sum) > 0.001) {
+          const ok = await showConfirm(
+            `В QR указана сумма ${money(parsed.sum)}. Подставить её в поле «Сумма»?`,
+            "Сумма из чека"
+          );
+          if (ok) {
+            sumInput.value = formatAmount(parsed.sum);
+            sumInput.dispatchEvent(new Event("input", { bubbles: true }));
+          }
+        }
+      }
+    }
+  };
+
+  const tickDetect = async () => {
+    if (!detecting || !video || !("BarcodeDetector" in window)) return;
+    try {
+      const detector = new BarcodeDetector({ formats: ["qr_code"] });
+      const codes = await detector.detect(video);
+      if (codes?.length && codes[0].rawValue) {
+        await applyQrPayload(codes[0].rawValue);
+        return;
+      }
+    } catch {
+      /* continue scanning */
+    }
+    scanTimer = setTimeout(tickDetect, 350);
+  };
+
+  document.getElementById("btn-receipt-upload")?.addEventListener("click", () => fileInput?.click());
+  document.getElementById("btn-receipt-clear")?.addEventListener("click", () => {
+    stopScanner();
+    if (fileInput) fileInput.value = "";
+    setReceipt(null);
+  });
+  document.getElementById("btn-qr-cancel")?.addEventListener("click", stopScanner);
+
+  fileInput?.addEventListener("change", async () => {
+    const file = fileInput.files?.[0];
+    if (!file) return;
+    try {
+      const next = await fileToReceiptAttachment(file);
+      if (receipt?.qr) next.qr = receipt.qr;
+      setReceipt(next);
+
+      if (String(file.type || "").startsWith("image/") && "BarcodeDetector" in window) {
+        try {
+          const detector = new BarcodeDetector({ formats: ["qr_code"] });
+          const bmp = await createImageBitmap(file);
+          const codes = await detector.detect(bmp);
+          bmp.close?.();
+          if (codes?.length && codes[0].rawValue) {
+            await applyQrPayload(codes[0].rawValue);
+          }
+        } catch {
+          /* QR на фото необязателен */
+        }
+      }
+    } catch (err) {
+      showAlert(err?.message || "Не удалось прикрепить чек", "Чек");
+      fileInput.value = "";
+    }
+  });
+
+  document.getElementById("btn-receipt-scan")?.addEventListener("click", async () => {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      showAlert("Камера недоступна в этом браузере. Загрузите фото чека файлом.", "Сканер QR");
+      return;
+    }
+    if (!("BarcodeDetector" in window)) {
+      showAlert(
+        "Сканирование QR в этом браузере не поддерживается. Загрузите фото чека — при возможности QR распознается с изображения.",
+        "Сканер QR"
+      );
+      fileInput?.click();
+      return;
+    }
+    try {
+      stopScanner();
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: "environment" } },
+        audio: false,
+      });
+      scanner?.classList.remove("hidden");
+      if (video) {
+        video.srcObject = stream;
+        await video.play();
+      }
+      detecting = true;
+      tickDetect();
+    } catch {
+      stopScanner();
+      showAlert("Не удалось открыть камеру. Разрешите доступ или загрузите фото чека.", "Сканер QR");
+    }
+  });
+
+  emit();
+
+  return {
+    getReceipt: () => receipt,
+    stop: stopScanner,
+  };
 }
 
 function openReportEditor(existingId) {
@@ -2800,6 +3103,7 @@ function openReportEditor(existingId) {
           <option ${existing?.source?.includes("Собственные") ? "selected" : ""}>Собственные средства (компенсация)</option>
         </select>
       </label>
+      ${receiptAttachMarkup(existing?.receipt)}
     </form>
     <div class="modal-actions modal-actions-split">
       <button type="button" class="btn btn-secondary" data-close>Отмена</button>
@@ -2811,6 +3115,7 @@ function openReportEditor(existingId) {
   `);
 
   bindAmountInputs(document.getElementById("report-form"));
+  const receiptCtl = bindReceiptAttach({ initial: existing?.receipt || null });
 
   const readForm = () => {
     const fd = new FormData(document.getElementById("report-form"));
@@ -2821,6 +3126,7 @@ function openReportEditor(existingId) {
       procedure: String(fd.get("procedure")),
       sum: parseAmount(fd.get("sum")),
       source: String(fd.get("source")),
+      receipt: receiptCtl.getReceipt(),
     };
   };
 
@@ -2836,6 +3142,8 @@ function openReportEditor(existingId) {
       showAlert("Укажите сумму с двумя знаками после запятой, например 15 000,00", "Проверьте сумму");
       return;
     }
+
+    receiptCtl.stop();
 
     if (existing) {
       Object.assign(existing, data, {
@@ -2921,6 +3229,7 @@ function openReportModal(id) {
       <div class="field"><span>Процедура</span><div class="readonly">${r.procedure || "—"}</div></div>
       <div class="field"><span>Сумма</span><div class="readonly money">${money(r.sum)}</div></div>
       <div class="field"><span>Источник</span><div class="readonly">${r.source || "—"}</div></div>
+      ${receiptViewMarkup(r.receipt)}
       ${r.reviewComment ? `<div class="field full"><span>Комментарий проверки</span><div class="readonly rework-box">${r.reviewComment}</div></div>` : ""}
       ${
         isAdminReview
@@ -2999,6 +3308,11 @@ function showModal(html) {
 }
 
 function closeModal() {
+  const video = document.getElementById("qr-video");
+  const stream = video?.srcObject;
+  if (stream && typeof stream.getTracks === "function") {
+    stream.getTracks().forEach((t) => t.stop());
+  }
   document.getElementById("modal")?.remove();
 }
 
