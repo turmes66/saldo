@@ -75,6 +75,20 @@ const state = {
       issueId: null,
       createdByName: "Балашова Юлия Алексеевна",
     },
+    {
+      id: 204,
+      payerType: "user",
+      payerId: 2,
+      payerName: "Петров Иван Алексеевич",
+      amount: 35000,
+      date: "2026-08-03",
+      purpose: "Приход № 301: Ноутбук и монитор",
+      note: "Зачисление по принятому приходу пользователя",
+      status: "Активна",
+      issueId: null,
+      incomeId: 301,
+      createdByName: "Балашова Юлия Алексеевна",
+    },
   ],
   userIncomes: [
     {
@@ -88,8 +102,9 @@ const state = {
       purpose: "Ноутбук и монитор",
       procedure: "",
       note: "Продажа списанной офисной техники",
-      status: "Принят",
+      status: "Зачислен",
       reviewComment: "",
+      receiptId: 204,
     },
     {
       id: 302,
@@ -341,6 +356,8 @@ function badge(status) {
     "На проверке": "warn",
     Утверждён: "ok",
     Принят: "ok",
+    Зачислен: "ok",
+    "К сдаче": "rework",
     Выплачено: "ok",
     Завершён: "ok",
     Черновик: "neutral",
@@ -534,6 +551,8 @@ function activityActionLabel(action) {
     submit: "Отправка",
     approve: "Утверждение",
     accept: "Принятие",
+    await_handover: "К сдаче",
+    credit: "Зачисление в ДС",
     rework: "Возврат на доработку",
     reject: "Отклонение",
     withdraw: "Отзыв",
@@ -850,10 +869,9 @@ function renderNav() {
   if (state.role === "admin") {
     els.nav.innerHTML = `
       ${navButton("issues", "Выдача денежных средств", icons.cash, p === "issues")}
-      ${navButton("receipts", "Получение денежных средств", icons.inflow, p === "receipts")}
+      ${navButton("receipts", "Получение денежных средств", icons.inflow, p === "receipts" || p === "incomes")}
       ${navButton("cashflow", "Движение денежных средств", icons.flow, p === "cashflow")}
       ${navButton("reports", "Отчёты", icons.report, p === "reports")}
-      ${navButton("incomes", "Приходы", icons.wallet, p === "incomes")}
       ${navButton("users", "Пользователи", icons.users, p === "users")}
       ${navButton("dicts", "Справочники", icons.book, p === "dicts" || String(p).startsWith("dict-"))}
       ${navButton("history", "Журнал действий", icons.history, p === "history")}
@@ -885,10 +903,9 @@ function render() {
   if (state.role === "admin") {
     if (page === "home") return renderAdminHome();
     if (page === "issues" || page === "balances") return renderIssues();
-    if (page === "receipts") return renderReceipts();
+    if (page === "receipts" || page === "incomes") return renderReceipts();
     if (page === "cashflow") return renderCashflow();
     if (page === "reports") return renderReportsAdmin();
-    if (page === "incomes") return renderIncomesAdmin();
     if (page === "users") return renderUsers();
     if (page === "dicts") return renderDictsBoard();
     if (page.startsWith("dict-")) return renderDictList(page.replace("dict-", ""));
@@ -974,7 +991,7 @@ function renderAdminHome() {
         <button type="button" class="card stat card-link" data-go="users"><div class="label">Активные пользователи</div><div class="value">${activeUsers}</div><div class="hint">из ${state.users.length} учётных записей</div></button>
         <button type="button" class="card stat card-link" data-go="issues"><div class="label">Выдачи</div><div class="value">${state.issues.length}</div><div class="hint">всего операций</div></button>
         <button type="button" class="card stat card-link" data-go="reports"><div class="label">Отчёты на проверке</div><div class="value">${state.reports.filter((r) => r.status === "На проверке").length}</div><div class="hint">требуют внимания</div></button>
-        <button type="button" class="card stat card-link" data-go="incomes"><div class="label">Приходы на проверке</div><div class="value">${incomesAwaitingReview().length}</div><div class="hint">принять или отклонить</div></button>
+        <button type="button" class="card stat card-link" data-go="receipts"><div class="label">Приходы на проверке</div><div class="value">${incomesAwaitingReview().length}</div><div class="hint">в получении ДС</div></button>
       </div>
     </div>
 
@@ -995,10 +1012,10 @@ function renderAdminHome() {
           <p>Сводный просмотр отчётов по авторам, компаниям и процедурам.</p>
           <span class="pc-go">Перейти</span>
         </button>
-        <button type="button" class="product-card g4" data-go="incomes">
-          <span class="pc-icon">${icons.wallet}</span>
-          <strong>Приходы</strong>
-          <p>Принять или отклонить приходы, зарегистрированные пользователями.</p>
+        <button type="button" class="product-card g4" data-go="receipts">
+          <span class="pc-icon">${icons.inflow}</span>
+          <strong>Получение ДС</strong>
+          <p>Поступления, согласование приходов и зачисление в движение ДС.</p>
           <span class="pc-go">Перейти</span>
         </button>
       </div>
@@ -1025,10 +1042,10 @@ function renderUserHome() {
         <button type="button" class="btn btn-primary" style="margin-top:14px" data-go="funds">Мои средства</button>
       </div>
       <div class="card">
-        <h3 class="widget-title">${icons.inflow} Принятые поступления</h3>
+        <h3 class="widget-title">${icons.inflow} Приходы за месяц</h3>
         <div class="stat" style="padding:0">
           <div class="value">${money(incomeMonth)}</div>
-          <div class="hint">за ${monthLabel.toLowerCase()} · только принятые администратором</div>
+          <div class="hint">за ${monthLabel.toLowerCase()} · к сдаче и зачисленные</div>
         </div>
         <button type="button" class="btn btn-secondary" style="margin-top:14px" data-action="new-income">Зарегистрировать приход</button>
       </div>
@@ -1311,26 +1328,32 @@ function renderIssues() {
 
   els.content.innerHTML = `
     <p class="section-note" style="margin-top:0">Архивная выдача не входит в «получено / остаток», история сохраняется.</p>
-    <div class="filters-bar">
-      <select id="issue-filter-recipient" class="filter-select" title="Получатель">
-        <option value="all" selected>Все получатели</option>
-        ${recipients.map((n) => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join("")}
-      </select>
-      <div class="filter-date-range">
-        <label class="filter-date"><span>Период с</span><input type="date" id="issue-filter-from" class="filter-select" value="" /></label>
-        <label class="filter-date"><span>по</span><input type="date" id="issue-filter-to" class="filter-select" value="" /></label>
+    <div class="filters-stack">
+      <div class="search-wrap filters-search">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <input class="search" id="issue-search" placeholder="Поиск по получателю, назначению или №..." autocomplete="off" />
       </div>
-      <select id="issue-filter-company" class="filter-select" title="Компания">
-        <option value="all" selected>Все компании</option>
-        ${companies.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("")}
-      </select>
-      <select id="issue-filter-purpose" class="filter-select" title="Назначение">
-        <option value="all" selected>Все назначения</option>
-        ${purposes.map((p) => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join("")}
-      </select>
-      <div class="filters-actions">
-        <button type="button" class="btn btn-secondary btn-sm filters-reset" id="issue-clear-filters">Снять все фильтры</button>
-        <button type="button" class="btn btn-primary btn-sm" id="btn-new-issue">Создать выдачу</button>
+      <div class="filters-bar">
+        <div class="filter-date-range">
+          <label class="filter-date"><span>Период с</span><input type="date" id="issue-filter-from" class="filter-select" value="" /></label>
+          <label class="filter-date"><span>по</span><input type="date" id="issue-filter-to" class="filter-select" value="" /></label>
+        </div>
+        <select id="issue-filter-recipient" class="filter-select" title="Получатель">
+          <option value="all" selected>Все получатели</option>
+          ${recipients.map((n) => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join("")}
+        </select>
+        <select id="issue-filter-company" class="filter-select" title="Компания">
+          <option value="all" selected>Все компании</option>
+          ${companies.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("")}
+        </select>
+        <select id="issue-filter-purpose" class="filter-select" title="Назначение">
+          <option value="all" selected>Все назначения</option>
+          ${purposes.map((p) => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join("")}
+        </select>
+        <div class="filters-actions">
+          <button type="button" class="btn btn-secondary btn-sm filters-reset" id="issue-clear-filters">Снять все фильтры</button>
+          <button type="button" class="btn btn-primary btn-sm" id="btn-new-issue">Создать выдачу</button>
+        </div>
       </div>
     </div>
     <div class="table-wrap">
@@ -1346,6 +1369,7 @@ function renderIssues() {
   `;
 
   const paint = () => {
+    const q = document.getElementById("issue-search").value.toLowerCase().trim();
     const recipient = document.getElementById("issue-filter-recipient").value;
     const from = document.getElementById("issue-filter-from").value;
     const to = document.getElementById("issue-filter-to").value;
@@ -1358,6 +1382,17 @@ function renderIssues() {
     if (to) list = list.filter((i) => i.date <= to);
     if (company !== "all") list = list.filter((i) => i.company === company);
     if (purpose !== "all") list = list.filter((i) => i.purpose === purpose);
+    if (q) {
+      list = list.filter(
+        (i) =>
+          String(i.id).includes(q) ||
+          issueRecipientName(i).toLowerCase().includes(q) ||
+          String(i.purpose || "").toLowerCase().includes(q) ||
+          String(i.company || "").toLowerCase().includes(q) ||
+          String(i.note || "").toLowerCase().includes(q) ||
+          String(i.procedure || "").toLowerCase().includes(q)
+      );
+    }
 
     document.getElementById("issues-body").innerHTML = list.length
       ? issueRows(list)
@@ -1365,10 +1400,12 @@ function renderIssues() {
     bindIssueArchiveActions();
   };
 
+  document.getElementById("issue-search").addEventListener("input", paint);
   ["issue-filter-recipient", "issue-filter-from", "issue-filter-to", "issue-filter-company", "issue-filter-purpose"].forEach(
     (id) => document.getElementById(id).addEventListener("change", paint)
   );
   document.getElementById("issue-clear-filters").addEventListener("click", () => {
+    document.getElementById("issue-search").value = "";
     document.getElementById("issue-filter-recipient").value = "all";
     document.getElementById("issue-filter-from").value = "";
     document.getElementById("issue-filter-to").value = "";
@@ -1692,6 +1729,7 @@ function bindReceiptArchiveActions() {
 
 function renderReceipts() {
   setTitle("Получение денежных средств");
+  state.page = "receipts";
 
   const payers = [...new Set(state.receipts.map((r) => receiptPayerName(r)).filter(Boolean))].sort((a, b) =>
     a.localeCompare(b, "ru")
@@ -1707,53 +1745,211 @@ function renderReceipts() {
   const purposes = [...new Set(state.receipts.map((r) => r.purpose).filter(Boolean))].sort((a, b) =>
     a.localeCompare(b, "ru")
   );
+  const incomeRows = adminIncomes();
+  const awaiting = incomesAwaitingReview().length;
+  const pendingHandover = incomesPendingHandover().length;
+  const incomeCompanies = [...new Set(incomeRows.map((r) => r.company).filter(Boolean))].sort((a, b) =>
+    a.localeCompare(b, "ru")
+  );
+  const incomeTypes = Object.values(USER_INCOME_TYPES);
 
   els.content.innerHTML = `
-    <p class="section-note" style="margin-top:0">
-      Здесь фиксируются поступления администратору: от пользователей (возвраты, передачи) и от компаний.
-      Удаление не используется — записи архивируются и не входят в сводку движения.
-      Приходы, которые пользователь зарегистрировал сам, согласуются в разделе
-      <button type="button" class="linkish" data-go="incomes">«Приходы»</button>
-      (принять / отклонить).
-    </p>
-    <div class="filters-bar">
-      <select id="receipt-filter-payer" class="filter-select" title="От кого">
-        <option value="all" selected>Все плательщики</option>
-        ${payers.map((n) => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join("")}
-      </select>
-      <div class="filter-date-range">
-        <label class="filter-date"><span>Период с</span><input type="date" id="receipt-filter-from" class="filter-select" value="" /></label>
-        <label class="filter-date"><span>по</span><input type="date" id="receipt-filter-to" class="filter-select" value="" /></label>
-      </div>
-      <select id="receipt-filter-company" class="filter-select" title="Компания">
-        <option value="all" selected>Все компании</option>
-        ${companies.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("")}
-      </select>
-      <select id="receipt-filter-purpose" class="filter-select" title="Назначение">
-        <option value="all" selected>Все назначения</option>
-        ${purposes.map((p) => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join("")}
-      </select>
-      <div class="filters-actions">
-        <button type="button" class="btn btn-secondary btn-sm filters-reset" id="receipt-clear-filters">Снять все фильтры</button>
-        <button type="button" class="btn btn-primary btn-sm" id="btn-new-receipt">Зафиксировать поступление</button>
-      </div>
-    </div>
-    <div class="table-wrap">
-      <table class="data">
-        <thead>
-          <tr>
-            <th>ID</th><th>От кого</th><th>Сумма</th><th>Дата</th><th>Назначение</th><th>Выдача</th><th>Комментарий</th><th>Статус</th><th></th>
-          </tr>
-        </thead>
-        <tbody id="receipts-body"></tbody>
-      </table>
+    <div class="funds-stack">
+      <section class="funds-block ${awaiting || pendingHandover ? "" : "is-collapsed"}" id="receipts-incomes-block">
+        <div class="section-head">
+          <button type="button" class="funds-collapse-toggle" id="receipts-incomes-toggle" aria-expanded="${awaiting || pendingHandover ? "true" : "false"}" aria-controls="receipts-incomes-body">
+            <span class="icon">${icons.wallet}</span>
+            <span class="funds-collapse-copy">
+              <strong>Приходы пользователей</strong>
+              <span class="funds-block-hint">На проверке: ${awaiting} · К сдаче: ${pendingHandover}</span>
+            </span>
+          </button>
+          <span class="funds-collapse-chevron" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+        </div>
+        <div class="funds-collapse-body" id="receipts-incomes-body">
+          <div class="workflow-hint card soft" style="margin-bottom:14px">
+            <strong>Согласование и зачисление.</strong>
+            Пользователь отправляет приход на проверку.
+            Если деньги уже у вас — нажмите «Деньги получены» (статус «Зачислен» и запись в движении ДС).
+            Если денег ещё нет — «Ожидать сдачу» (статус «К сдаче»); когда ДС поступят — «Отразить в движении ДС».
+            Отклонение — с комментарием; доработка не используется.
+          </div>
+          <div class="filters-stack">
+            <div class="search-wrap filters-search">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              <input class="search" id="income-admin-search" placeholder="Поиск по автору, основанию или №..." autocomplete="off" />
+            </div>
+            <div class="filters-bar">
+              <div class="filter-date-range">
+                <label class="filter-date"><span>Период с</span><input type="date" id="income-admin-from" class="filter-select" value="" /></label>
+                <label class="filter-date"><span>по</span><input type="date" id="income-admin-to" class="filter-select" value="" /></label>
+              </div>
+              <select id="income-admin-type" class="filter-select" title="Тип прихода">
+                <option value="all" selected>Все типы</option>
+                ${incomeTypes.map((t) => `<option value="${t.id}">${escapeHtml(t.label)}</option>`).join("")}
+              </select>
+              <select id="income-admin-status" class="filter-select" title="Статус">
+                <option value="all" selected>Все статусы</option>
+                <option value="На проверке">На проверке</option>
+                <option value="К сдаче">К сдаче</option>
+                <option value="Зачислен">Зачислен</option>
+                <option value="Отклонён">Отклонён</option>
+                <option value="Архив">Архив</option>
+              </select>
+              <select id="income-admin-company" class="filter-select" title="Компания">
+                <option value="all">Все компании</option>
+                ${incomeCompanies.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("")}
+              </select>
+              <button type="button" class="btn btn-secondary btn-sm filters-reset" id="income-admin-clear">Снять все фильтры</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table class="data">
+              <thead>
+                <tr>
+                  <th>№</th><th>Дата</th><th>Автор</th><th>Тип</th><th>Компания</th><th>Основание</th><th>Сумма</th><th>Статус</th><th></th>
+                </tr>
+              </thead>
+              <tbody id="income-admin-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="funds-block is-collapsed" id="receipts-admin-block">
+        <div class="section-head">
+          <button type="button" class="funds-collapse-toggle" id="receipts-admin-toggle" aria-expanded="false" aria-controls="receipts-admin-body">
+            <span class="icon">${icons.inflow}</span>
+            <span class="funds-collapse-copy">
+              <strong>Поступления администратору</strong>
+              <span class="funds-block-hint">Возвраты от пользователей и перечисления от компаний. Удаление не используется — только архив</span>
+            </span>
+          </button>
+          <div class="funds-block-aside">
+            <button type="button" class="btn btn-primary btn-sm" id="btn-new-receipt">Зафиксировать поступление</button>
+          </div>
+          <span class="funds-collapse-chevron" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+        </div>
+        <div class="funds-collapse-body" id="receipts-admin-body">
+          <div class="filters-stack">
+            <div class="search-wrap filters-search">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              <input class="search" id="receipt-search" placeholder="Поиск по плательщику, назначению или №..." autocomplete="off" />
+            </div>
+            <div class="filters-bar">
+              <div class="filter-date-range">
+                <label class="filter-date"><span>Период с</span><input type="date" id="receipt-filter-from" class="filter-select" value="" /></label>
+                <label class="filter-date"><span>по</span><input type="date" id="receipt-filter-to" class="filter-select" value="" /></label>
+              </div>
+              <select id="receipt-filter-type" class="filter-select" title="Тип плательщика">
+                <option value="all" selected>Все типы</option>
+                <option value="user">От пользователя</option>
+                <option value="company">От компании</option>
+              </select>
+              <select id="receipt-filter-payer" class="filter-select" title="От кого">
+                <option value="all" selected>Все плательщики</option>
+                ${payers.map((n) => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join("")}
+              </select>
+              <select id="receipt-filter-company" class="filter-select" title="Компания">
+                <option value="all" selected>Все компании</option>
+                ${companies.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("")}
+              </select>
+              <select id="receipt-filter-purpose" class="filter-select" title="Назначение">
+                <option value="all" selected>Все назначения</option>
+                ${purposes.map((p) => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join("")}
+              </select>
+              <button type="button" class="btn btn-secondary btn-sm filters-reset" id="receipt-clear-filters">Снять все фильтры</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table class="data">
+              <thead>
+                <tr>
+                  <th>ID</th><th>От кого</th><th>Сумма</th><th>Дата</th><th>Назначение</th><th>Выдача</th><th>Комментарий</th><th>Статус</th><th></th>
+                </tr>
+              </thead>
+              <tbody id="receipts-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
     </div>
   `;
 
-  const paint = () => {
+  const paintIncomes = () => {
+    const q = document.getElementById("income-admin-search").value.toLowerCase().trim();
+    const from = document.getElementById("income-admin-from").value;
+    const to = document.getElementById("income-admin-to").value;
+    const type = document.getElementById("income-admin-type").value;
+    const status = document.getElementById("income-admin-status").value;
+    const company = document.getElementById("income-admin-company").value;
+    let list = adminIncomes().slice().map(normalizeUserIncome);
+    if (from) list = list.filter((r) => r.date >= from);
+    if (to) list = list.filter((r) => r.date <= to);
+    if (type !== "all") list = list.filter((r) => r.type === type);
+    if (status !== "all") list = list.filter((r) => r.status === status);
+    if (company !== "all") list = list.filter((r) => r.company === company);
+    if (q) {
+      list = list.filter(
+        (r) =>
+          String(r.id).includes(q) ||
+          incomeAuthorName(r).toLowerCase().includes(q) ||
+          (r.purpose || "").toLowerCase().includes(q) ||
+          (r.company || "").toLowerCase().includes(q) ||
+          incomeTypeLabel(r).toLowerCase().includes(q) ||
+          (r.fromName || "").toLowerCase().includes(q)
+      );
+    }
+
+    document.getElementById("income-admin-body").innerHTML = list.length
+      ? list
+          .map((r) => {
+            const sub = [r.fromName ? `от: ${r.fromName}` : "", r.procedure ? `процедура: ${r.procedure}` : ""]
+              .filter(Boolean)
+              .join(" · ");
+            return `<tr>
+              <td>${r.id}</td>
+              <td>${formatDate(r.date)}</td>
+              <td>${escapeHtml(incomeAuthorName(r))}</td>
+              <td>${escapeHtml(incomeTypeLabel(r))}</td>
+              <td>${escapeHtml(r.company || "—")}</td>
+              <td>
+                <div class="dict-primary">
+                  <div class="dict-name">${escapeHtml(r.purpose || "—")}</div>
+                  ${sub ? `<div class="dict-sub">${escapeHtml(sub)}</div>` : ""}
+                </div>
+              </td>
+              <td class="money">${money(r.amount)}</td>
+              <td>${badge(r.status)}</td>
+              <td><button type="button" class="btn btn-secondary btn-sm" data-open-income="${r.id}">Открыть</button></td>
+            </tr>`;
+          })
+          .join("")
+      : `<tr><td colspan="9" class="empty">${
+          status === "На проверке" && !from && !to && type === "all" && company === "all" && !q
+            ? "Нет приходов на проверке. Пользователь должен нажать «Отправить на проверку», а не только сохранить черновик."
+            : status === "К сдаче" && !from && !to && type === "all" && company === "all" && !q
+              ? "Нет приходов к сдаче. Когда примете без денег — они появятся здесь; затем «Отразить в движении ДС»."
+            : incomeRows.length
+              ? "Ничего не найдено"
+              : "Приходов пока нет"
+        }</td></tr>`;
+
+    document.querySelectorAll("[data-open-income]").forEach((btn) => {
+      btn.addEventListener("click", () => openIncomeModal(btn.dataset.openIncome));
+    });
+  };
+
+  const paintReceipts = () => {
+    const q = document.getElementById("receipt-search").value.toLowerCase().trim();
     const payer = document.getElementById("receipt-filter-payer").value;
     const from = document.getElementById("receipt-filter-from").value;
     const to = document.getElementById("receipt-filter-to").value;
+    const type = document.getElementById("receipt-filter-type").value;
     const company = document.getElementById("receipt-filter-company").value;
     const purpose = document.getElementById("receipt-filter-purpose").value;
 
@@ -1761,10 +1957,21 @@ function renderReceipts() {
     if (payer !== "all") list = list.filter((r) => receiptPayerName(r) === payer);
     if (from) list = list.filter((r) => r.date >= from);
     if (to) list = list.filter((r) => r.date <= to);
+    if (type !== "all") list = list.filter((r) => r.payerType === type);
     if (company !== "all") {
       list = list.filter((r) => r.payerType === "company" && receiptPayerName(r) === company);
     }
     if (purpose !== "all") list = list.filter((r) => r.purpose === purpose);
+    if (q) {
+      list = list.filter(
+        (r) =>
+          String(r.id).includes(q) ||
+          receiptPayerName(r).toLowerCase().includes(q) ||
+          String(r.purpose || "").toLowerCase().includes(q) ||
+          String(r.note || "").toLowerCase().includes(q) ||
+          String(r.issueId || "").includes(q)
+      );
+    }
 
     document.getElementById("receipts-body").innerHTML = list.length
       ? receiptRows(list)
@@ -1772,20 +1979,73 @@ function renderReceipts() {
     bindReceiptArchiveActions();
   };
 
-  ["receipt-filter-payer", "receipt-filter-from", "receipt-filter-to", "receipt-filter-company", "receipt-filter-purpose"].forEach(
-    (id) => document.getElementById(id).addEventListener("change", paint)
+  document.getElementById("income-admin-search").addEventListener("input", paintIncomes);
+  ["income-admin-from", "income-admin-to", "income-admin-type", "income-admin-status", "income-admin-company"].forEach((id) => {
+    document.getElementById(id).addEventListener("change", paintIncomes);
+  });
+  document.getElementById("income-admin-clear").addEventListener("click", () => {
+    document.getElementById("income-admin-search").value = "";
+    document.getElementById("income-admin-from").value = "";
+    document.getElementById("income-admin-to").value = "";
+    document.getElementById("income-admin-type").value = "all";
+    document.getElementById("income-admin-status").value = "all";
+    document.getElementById("income-admin-company").value = "all";
+    paintIncomes();
+  });
+
+  document.getElementById("receipt-search").addEventListener("input", paintReceipts);
+  ["receipt-filter-payer", "receipt-filter-from", "receipt-filter-to", "receipt-filter-type", "receipt-filter-company", "receipt-filter-purpose"].forEach(
+    (id) => document.getElementById(id).addEventListener("change", paintReceipts)
   );
   document.getElementById("receipt-clear-filters").addEventListener("click", () => {
+    document.getElementById("receipt-search").value = "";
     document.getElementById("receipt-filter-payer").value = "all";
     document.getElementById("receipt-filter-from").value = "";
     document.getElementById("receipt-filter-to").value = "";
+    document.getElementById("receipt-filter-type").value = "all";
     document.getElementById("receipt-filter-company").value = "all";
     document.getElementById("receipt-filter-purpose").value = "all";
-    paint();
+    paintReceipts();
   });
   document.getElementById("btn-new-receipt").addEventListener("click", openReceiptModal);
-  paint();
-  bindGo();
+
+  const bindCollapse = (blockId, toggleId, storageKey) => {
+    const block = document.getElementById(blockId);
+    const toggle = document.getElementById(toggleId);
+    const chevron = block?.querySelector(".funds-collapse-chevron");
+    const setCollapsed = (collapsed) => {
+      block?.classList.toggle("is-collapsed", collapsed);
+      toggle?.setAttribute("aria-expanded", collapsed ? "false" : "true");
+      try {
+        sessionStorage.setItem(storageKey, collapsed ? "1" : "0");
+      } catch {
+        /* ignore */
+      }
+    };
+    // по умолчанию свёрнуто; развёрнуто только если админ явно открывал («0»)
+    let collapsed = true;
+    try {
+      collapsed = sessionStorage.getItem(storageKey) !== "0";
+    } catch {
+      collapsed = true;
+    }
+    setCollapsed(collapsed);
+    const onToggle = () => setCollapsed(!block.classList.contains("is-collapsed"));
+    toggle?.addEventListener("click", onToggle);
+    chevron?.addEventListener("click", onToggle);
+  };
+  bindCollapse("receipts-incomes-block", "receipts-incomes-toggle", "receipts-incomes-collapsed");
+  bindCollapse("receipts-admin-block", "receipts-admin-toggle", "receipts-admin-collapsed");
+
+  paintIncomes();
+  paintReceipts();
+}
+
+function renderIncomesAdmin() {
+  // legacy: приходы объединены с «Получение денежных средств»
+  state.page = "receipts";
+  renderNav();
+  renderReceipts();
 }
 
 function openReceiptModal() {
@@ -1973,8 +2233,6 @@ function collectCashMovements(from = "", to = "") {
 
 function renderCashflow() {
   setTitle("Движение денежных средств");
-  const defaultFrom = "2026-07-01";
-  const defaultTo = "2026-08-13";
 
   els.content.innerHTML = `
     <div class="filters-stack">
@@ -1984,8 +2242,8 @@ function renderCashflow() {
       </div>
       <div class="filters-bar">
         <div class="filter-date-range">
-          <label class="filter-date"><span>Период с</span><input type="date" id="cf-from" class="filter-select" value="${defaultFrom}" /></label>
-          <label class="filter-date"><span>по</span><input type="date" id="cf-to" class="filter-select" value="${defaultTo}" /></label>
+          <label class="filter-date"><span>Период с</span><input type="date" id="cf-from" class="filter-select" value="" /></label>
+          <label class="filter-date"><span>по</span><input type="date" id="cf-to" class="filter-select" value="" /></label>
         </div>
         <select id="cf-kind" class="filter-select" title="Тип операции">
           <option value="all">Все операции</option>
@@ -2023,11 +2281,12 @@ function renderCashflow() {
     const inflow = Math.round(moves.reduce((s, m) => s + m.inflow, 0) * 100) / 100;
     const outflow = Math.round(moves.reduce((s, m) => s + m.outflow, 0) * 100) / 100;
     const delta = Math.round((inflow - outflow) * 100) / 100;
+    const periodHint = from || to ? "за выбранный период" : "по всем операциям";
 
     document.getElementById("cf-stats").innerHTML = `
-      <div class="card soft stat"><div class="label">Поступления (приход)</div><div class="value">${money(inflow)}</div><div class="hint">входящие за период</div></div>
-      <div class="card soft stat"><div class="label">Выдачи (расход)</div><div class="value">${money(outflow)}</div><div class="hint">исходящие за период</div></div>
-      <div class="card soft stat"><div class="label">Сальдо за период</div><div class="value">${money(delta)}</div><div class="hint">поступления − выдачи</div></div>
+      <div class="card soft stat"><div class="label">Поступления (приход)</div><div class="value">${money(inflow)}</div><div class="hint">входящие · ${periodHint}</div></div>
+      <div class="card soft stat"><div class="label">Выдачи (расход)</div><div class="value">${money(outflow)}</div><div class="hint">исходящие · ${periodHint}</div></div>
+      <div class="card soft stat"><div class="label">Сальдо</div><div class="value">${money(delta)}</div><div class="hint">поступления − выдачи</div></div>
     `;
 
     let running = 0;
@@ -2073,7 +2332,7 @@ function renderCashflow() {
         <tbody>${body}</tbody>
         <tfoot>
           <tr>
-            <td colspan="5"><strong>Итого за период</strong></td>
+            <td colspan="5"><strong>Итого</strong></td>
             <td class="money"><strong>${money(inflow)}</strong></td>
             <td class="money"><strong>${money(outflow)}</strong></td>
             <td class="money ${delta >= 0 ? "delta-plus" : "delta-minus"}"><strong>${money(delta)}</strong></td>
@@ -2088,8 +2347,8 @@ function renderCashflow() {
     document.getElementById(id).addEventListener(id === "cf-search" ? "input" : "change", paint);
   });
   document.getElementById("cf-clear").addEventListener("click", () => {
-    document.getElementById("cf-from").value = defaultFrom;
-    document.getElementById("cf-to").value = defaultTo;
+    document.getElementById("cf-from").value = "";
+    document.getElementById("cf-to").value = "";
     document.getElementById("cf-kind").value = "all";
     document.getElementById("cf-search").value = "";
     paint();
@@ -2119,9 +2378,9 @@ function renderUsers() {
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
         <input class="search" id="user-search" placeholder="Поиск по email или имени..." />
       </div>
-      <button type="button" class="btn btn-secondary btn-toolbar" id="btn-logout-all" title="Завершить все активные сессии">
+      <button type="button" class="btn btn-secondary btn-toolbar" id="btn-logout-all" title="Завершить все активные сессии пользователей">
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 7V5a2 2 0 0 1 2-2h7v18h-7a2 2 0 0 1-2-2v-2M15 12H4m0 0 3-3M4 12l3 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Выйти всех
+        Завершить все сессии
       </button>
       <button type="button" class="btn btn-secondary btn-toolbar" id="btn-reset-passwords" title="Сбросить пароли всех пользователей">
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="8" cy="14" r="3.2" stroke="currentColor" stroke-width="1.8"/><path d="M10.5 11.5 18 4l2 2-2.5 2.5L19 10l-2 1-1.5-1.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -2757,36 +3016,40 @@ function renderActivityLog() {
       }
       Удаление данных в продукте не используется — применяется архивирование.
     </p>
-    <div class="filters-bar">
+    <div class="filters-stack">
       <div class="search-wrap filters-search">
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
         <input class="search" id="history-search" placeholder="Поиск по описанию или объекту..." />
       </div>
-      <select id="history-action" class="filter-select" title="Действие">
-        <option value="all">Все действия</option>
-        ${actions.map((a) => `<option value="${a}">${activityActionLabel(a)}</option>`).join("")}
-      </select>
-      <select id="history-entity" class="filter-select" title="Объект">
-        <option value="all">Все объекты</option>
-        ${entities.map((e) => `<option value="${e}">${activityEntityLabel(e)}</option>`).join("")}
-      </select>
-      ${
-        isAdmin
-          ? `<select id="history-actor" class="filter-select" title="Кто">
-              <option value="all">Все пользователи</option>
-              ${actors.map((a) => `<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`).join("")}
-            </select>`
-          : ""
-      }
-      <label class="filter-date">
-        <span>с</span>
-        <input type="date" id="history-date-from" class="filter-select" />
-      </label>
-      <label class="filter-date">
-        <span>по</span>
-        <input type="date" id="history-date-to" class="filter-select" />
-      </label>
-      <button type="button" class="btn btn-secondary btn-sm filters-reset" id="history-clear" title="Сбросить фильтры">Снять все фильтры</button>
+      <div class="filters-bar">
+        <div class="filter-date-range">
+          <label class="filter-date">
+            <span>Период с</span>
+            <input type="date" id="history-date-from" class="filter-select" />
+          </label>
+          <label class="filter-date">
+            <span>по</span>
+            <input type="date" id="history-date-to" class="filter-select" />
+          </label>
+        </div>
+        <select id="history-action" class="filter-select" title="Действие">
+          <option value="all">Все действия</option>
+          ${actions.map((a) => `<option value="${a}">${activityActionLabel(a)}</option>`).join("")}
+        </select>
+        <select id="history-entity" class="filter-select" title="Объект">
+          <option value="all">Все объекты</option>
+          ${entities.map((e) => `<option value="${e}">${activityEntityLabel(e)}</option>`).join("")}
+        </select>
+        ${
+          isAdmin
+            ? `<select id="history-actor" class="filter-select" title="Кто">
+                <option value="all">Все пользователи</option>
+                ${actors.map((a) => `<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`).join("")}
+              </select>`
+            : ""
+        }
+        <button type="button" class="btn btn-secondary btn-sm filters-reset" id="history-clear" title="Сбросить фильтры">Снять все фильтры</button>
+      </div>
     </div>
     <div class="users-panel">
       <table class="users-table history-table">
@@ -2891,10 +3154,20 @@ function isUserIncomeArchived(row) {
   return String(row?.status || "").startsWith("Архив");
 }
 
-/** Принятый админом приход (учитывается в сводках) */
+/** Приход, подтверждённый админом (к сдаче или уже зачислен) — учитывается в сводках */
 function isUserIncomeAccepted(row) {
   const s = String(row?.status || "");
-  return s === "Принят" || s === "Активна";
+  return s === "Зачислен" || s === "К сдаче" || s === "Принят" || s === "Активна";
+}
+
+/** Деньги по приходу уже отражены в движении ДС */
+function isUserIncomeCredited(row) {
+  const s = String(row?.status || "");
+  return s === "Зачислен" || s === "Принят" || s === "Активна";
+}
+
+function isUserIncomePendingHandover(row) {
+  return String(row?.status || "") === "К сдаче";
 }
 
 function isUserIncomeActive(row) {
@@ -2910,12 +3183,62 @@ function incomeAuthorName(row) {
   return u ? fullName(u) : "—";
 }
 
+function nextReceiptId() {
+  return state.receipts.reduce((m, r) => Math.max(m, Number(r.id) || 0), 200) + 1;
+}
+
+/**
+ * Отразить приход пользователя в движении ДС (создаёт поступление у админа).
+ * Не списывает остаток выдачи — это сдача бизнес-денег, не возврат под отчёт.
+ */
+function creditUserIncome(row, { date } = {}) {
+  normalizeUserIncome(row);
+  if (row.receiptId) {
+    const existing = state.receipts.find((r) => r.id === row.receiptId);
+    if (existing) {
+      row.status = "Зачислен";
+      return existing;
+    }
+  }
+  const already = state.receipts.find((r) => r.incomeId === row.id && !String(r.status || "").startsWith("Архив"));
+  if (already) {
+    row.receiptId = already.id;
+    row.status = "Зачислен";
+    return already;
+  }
+
+  const author = incomeAuthorName(row);
+  const creditDate = date || row.date || new Date().toISOString().slice(0, 10);
+  const receipt = {
+    id: nextReceiptId(),
+    payerType: "user",
+    payerId: row.userId,
+    payerName: author,
+    amount: Number(row.amount) || 0,
+    date: creditDate,
+    purpose: `Приход № ${row.id}: ${row.purpose || incomeTypeLabel(row)}`,
+    note: [row.company ? `Компания: ${row.company}` : "", row.fromName ? `От: ${row.fromName}` : "", row.note || ""]
+      .filter(Boolean)
+      .join(" · "),
+    status: "Активна",
+    issueId: null,
+    incomeId: row.id,
+    createdByName: currentActor().actorName,
+  };
+  state.receipts.unshift(receipt);
+  row.receiptId = receipt.id;
+  row.status = "Зачислен";
+  row.reviewComment = "";
+  return receipt;
+}
+
 function adminIncomes() {
   return state.userIncomes
     .map(normalizeUserIncome)
     .filter((r) => r.status && r.status !== "Черновик")
     .sort((a, b) => {
-      const rank = (s) => (s === "На проверке" ? 0 : s === "Принят" ? 1 : 2);
+      const rank = (s) =>
+        s === "На проверке" ? 0 : s === "К сдаче" ? 1 : s === "Зачислен" || s === "Принят" ? 2 : 3;
       const d = rank(a.status) - rank(b.status);
       if (d !== 0) return d;
       return String(b.date).localeCompare(String(a.date)) || Number(b.id) - Number(a.id);
@@ -2924,6 +3247,10 @@ function adminIncomes() {
 
 function incomesAwaitingReview() {
   return state.userIncomes.map(normalizeUserIncome).filter((r) => r.status === "На проверке");
+}
+
+function incomesPendingHandover() {
+  return state.userIncomes.map(normalizeUserIncome).filter(isUserIncomePendingHandover);
 }
 
 const USER_INCOMES_STORE_KEY = "saldo_user_incomes_v1";
@@ -3003,8 +3330,9 @@ function normalizeUserIncome(row) {
   row.purpose = row.purpose || row.purposeDetail || "";
   row.note = row.note || "";
   row.reviewComment = row.reviewComment || "";
-  // старый статус «Активна» = уже принятый приход
-  if (row.status === "Активна") row.status = "Принят";
+  row.receiptId = row.receiptId || null;
+  // legacy: «Активна» / «Принят» без сдачи = уже зачислен в кассу
+  if (row.status === "Активна" || row.status === "Принят") row.status = "Зачислен";
   if (!row.status) row.status = "Черновик";
   return row;
 }
@@ -3056,7 +3384,7 @@ function userIncomeRows(rows) {
       const sub = [row.fromName ? `от: ${row.fromName}` : "", row.procedure ? `процедура: ${row.procedure}` : ""]
         .filter(Boolean)
         .join(" · ");
-      const canArchive = row.status === "Принят";
+      const canArchive = isUserIncomeCredited(row) && !archived;
       const canRestore = archived;
       const actionBtn = canUserEditIncome(row)
         ? `<button type="button" class="btn btn-secondary btn-sm" data-act="edit-income">Редактировать</button>`
@@ -3077,7 +3405,7 @@ function userIncomeRows(rows) {
         <td>${escapeHtml(row.note || "—")}</td>
         <td>${badge(archived ? "Архив" : row.status)}</td>
         <td>
-          <div class="dict-actions" style="gap:8px;flex-wrap:wrap">
+          <div class="dict-actions table-row-actions">
             ${actionBtn}
             ${
               canArchive || canRestore
@@ -3099,18 +3427,18 @@ function bindUserIncomeArchiveActions() {
       if (!row || row.userId !== currentUserId()) return;
       normalizeUserIncome(row);
       const archived = isUserIncomeArchived(row);
-      if (!archived && row.status !== "Принят") {
-        showAlert("В архив можно отправить только принятый приход.", "Архивирование");
+      if (!archived && !isUserIncomeCredited(row)) {
+        showAlert("В архив можно отправить только зачисленный приход.", "Архивирование");
         return;
       }
       const ok = await showConfirm(
         archived
-          ? `Вернуть приход № ${row.id} в список принятых?`
+          ? `Вернуть приход № ${row.id} в список зачисленных?`
           : `Архивировать приход № ${row.id}?\n\nЗапись останется в истории. Удаление не выполняется.`,
         archived ? "Вернуть из архива" : "Архивировать приход"
       );
       if (!ok) return;
-      row.status = archived ? "Принят" : "Архив";
+      row.status = archived ? "Зачислен" : "Архив";
       persistUserIncomes();
       logActivity({
         action: archived ? "restore" : "archive",
@@ -3168,7 +3496,8 @@ function openMyIncomeModal(existingId = null) {
     <h3>${existing ? "Редактирование прихода" : "Зарегистрировать приход"}</h3>
     <p class="section-note" style="margin-top:0">
       Фиксируйте только деньги <strong>бизнеса</strong>, которые вы приняли.
-      После отправки приход проверит администратор: примет или отклонит (без доработки).
+      После отправки приход проверит администратор.
+      Если деньги уже у него — сразу «Зачислен» в движении ДС; иначе статус «К сдаче», пока не сдадите средства.
       Личные доходы, зарплата и премии здесь не учитываются.
     </p>
     <form id="income-form" class="form-grid">
@@ -3366,7 +3695,7 @@ function openMyIncomeModal(existingId = null) {
     render();
     if (status === "На проверке") {
       showAlert(
-        "Приход отправлен администратору.\nОткройте раздел «Приходы» под учётной записью администратора, чтобы принять или отклонить.",
+        "Отправлено администратору на утверждение.",
         "Отправлено на проверку"
       );
     }
@@ -3405,10 +3734,9 @@ function openIncomeModal(id) {
   }
 
   const isAdminReview = state.role === "admin" && row.status === "На проверке";
+  const isAdminHandover = state.role === "admin" && isUserIncomePendingHandover(row);
   const canWithdraw = state.role === "user" && row.userId === currentUserId() && row.status === "На проверке";
-  const sub = [row.fromName ? `от: ${row.fromName}` : "", row.procedure ? `процедура: ${row.procedure}` : ""]
-    .filter(Boolean)
-    .join(" · ");
+  const today = new Date().toISOString().slice(0, 10);
 
   showModal(`
     <h3>Приход № ${row.id}</h3>
@@ -3418,11 +3746,33 @@ function openIncomeModal(id) {
       <div class="field"><span>Дата</span><div class="readonly">${formatDate(row.date)}</div></div>
       <div class="field"><span>Сумма</span><div class="readonly money">${money(row.amount)}</div></div>
       <div class="field"><span>Компания</span><div class="readonly">${escapeHtml(row.company || "—")}</div></div>
-      <div class="field full"><span>Основание</span><div class="readonly">${escapeHtml(row.purpose || "—")}${sub ? `<div class="dict-sub" style="margin-top:4px">${escapeHtml(sub)}</div>` : ""}</div></div>
+      <div class="field full"><span>Основание</span><div class="readonly"><span class="dict-name">${escapeHtml(row.purpose || "—")}</span></div></div>
+      ${
+        row.fromName
+          ? `<div class="field"><span>От кого</span><div class="readonly">${escapeHtml(row.fromName)}</div></div>`
+          : ""
+      }
+      ${
+        row.procedure
+          ? `<div class="field"><span>Процедура</span><div class="readonly">${escapeHtml(row.procedure)}</div></div>`
+          : ""
+      }
       <div class="field full"><span>Комментарий</span><div class="readonly">${escapeHtml(row.note || "—")}</div></div>
       ${
         row.reviewComment
           ? `<div class="field full"><span>Комментарий проверки</span><div class="readonly rework-box">${escapeHtml(row.reviewComment)}</div></div>`
+          : ""
+      }
+      ${
+        row.receiptId
+          ? `<div class="field"><span>Поступление в ДС</span><div class="readonly">П-${row.receiptId}</div></div>`
+          : ""
+      }
+      ${
+        isAdminReview || isAdminHandover
+          ? `<label class="field"><span>Дата зачисления в ДС</span>
+              <input type="date" id="income-credit-date" value="${today}" />
+            </label>`
           : ""
       }
       ${
@@ -3432,34 +3782,73 @@ function openIncomeModal(id) {
             </label>`
           : ""
       }
+      ${
+        isAdminHandover
+          ? `<p class="login-hint full" style="grid-column:1/-1">Приход подтверждён, ожидается сдача денег. Когда ДС поступят — отразите их в движении: создастся поступление у администратора.</p>`
+          : ""
+      }
+      ${
+        state.role === "user" && isUserIncomePendingHandover(row)
+          ? `<p class="login-hint full" style="grid-column:1/-1">Администратор подтвердил приход. Ожидается сдача денежных средств — после получения админ отразит их в движении ДС.</p>`
+          : ""
+      }
     </div>
-    <div class="modal-actions modal-actions-split">
+    <div class="modal-actions modal-actions-fill">
       <button type="button" class="btn btn-secondary" data-close>Закрыть</button>
-      <div class="modal-actions-right">
-        ${
-          isAdminReview
-            ? `<button type="button" class="btn btn-danger" id="btn-reject-income">Отклонить</button>
-               <button type="button" class="btn btn-primary" id="btn-accept-income">Принять</button>`
-            : ""
-        }
-        ${
-          canWithdraw
-            ? `<button type="button" class="btn btn-secondary" id="btn-withdraw-income">Отозвать с проверки</button>`
-            : ""
-        }
-      </div>
+      ${
+        isAdminReview
+          ? `<button type="button" class="btn btn-danger" id="btn-reject-income">Отклонить</button>
+             <button type="button" class="btn btn-secondary" id="btn-await-income">Ожидать сдачу</button>
+             <button type="button" class="btn btn-primary" id="btn-credit-income">Деньги получены</button>`
+          : ""
+      }
+      ${
+        isAdminHandover
+          ? `<button type="button" class="btn btn-primary" id="btn-credit-income">Отразить в движении ДС</button>`
+          : ""
+      }
+      ${
+        canWithdraw
+          ? `<button type="button" class="btn btn-secondary" id="btn-withdraw-income">Отозвать с проверки</button>`
+          : ""
+      }
     </div>
   `);
 
-  document.getElementById("btn-accept-income")?.addEventListener("click", () => {
-    row.status = "Принят";
+  const doCredit = async () => {
+    const creditDate = document.getElementById("income-credit-date")?.value || today;
+    const ok = await showConfirm(
+      isAdminHandover
+        ? `Отразить приход № ${row.id} (${money(row.amount)}) в движении денежных средств?\n\nБудет создано поступление от ${incomeAuthorName(row)}.`
+        : `Подтвердить получение денег по приходу № ${row.id} (${money(row.amount)})?\n\nСтатус станет «Зачислен», в движении ДС появится поступление.`,
+      isAdminHandover ? "Отразить в движении ДС" : "Деньги получены"
+    );
+    if (!ok) return;
+    const receipt = creditUserIncome(row, { date: creditDate });
+    persistUserIncomes();
+    logActivity({
+      action: "credit",
+      entity: "income",
+      entityLabel: `Приход № ${row.id}`,
+      detail: `Приход зачислен в ДС (${money(row.amount)}) → поступление П-${receipt.id}: ${incomeAuthorName(row)} · ${row.purpose}`,
+    });
+    closeModal();
+    render();
+  };
+
+  document.getElementById("btn-credit-income")?.addEventListener("click", () => {
+    doCredit();
+  });
+
+  document.getElementById("btn-await-income")?.addEventListener("click", () => {
+    row.status = "К сдаче";
     row.reviewComment = "";
     persistUserIncomes();
     logActivity({
-      action: "accept",
+      action: "await_handover",
       entity: "income",
       entityLabel: `Приход № ${row.id}`,
-      detail: `Приход принят (${money(row.amount)}): ${incomeAuthorName(row)} · ${row.purpose}`,
+      detail: `Приход принят к сдаче (${money(row.amount)}): ${incomeAuthorName(row)} · ${row.purpose}`,
     });
     closeModal();
     render();
@@ -3506,118 +3895,6 @@ function openIncomeModal(id) {
     closeModal();
     renderFunds();
   });
-}
-
-function renderIncomesAdmin() {
-  setTitle("Приходы");
-  const rows = adminIncomes();
-  const awaiting = incomesAwaitingReview().length;
-  const companies = [...new Set(rows.map((r) => r.company).filter(Boolean))].sort((a, b) => a.localeCompare(b, "ru"));
-
-  els.content.innerHTML = `
-    <div class="workflow-hint card soft">
-      <strong>Согласование приходов.</strong>
-      Пользователь регистрирует приход и отправляет на проверку → вы принимаете или отклоняете с комментарием.
-      Доработка не используется: при отклонении пользователь создаёт новый приход.
-      Сейчас на проверке: <strong>${awaiting}</strong>
-    </div>
-    <div class="filters-bar">
-      <div class="search-wrap filters-search">
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-        <input class="search" id="income-admin-search" placeholder="Поиск по автору, основанию или №..." />
-      </div>
-      <select id="income-admin-status" class="filter-select" title="Статус">
-        <option value="На проверке" selected>На проверке</option>
-        <option value="all">Все статусы</option>
-        <option value="Принят">Принят</option>
-        <option value="Отклонён">Отклонён</option>
-        <option value="Архив">Архив</option>
-      </select>
-      <select id="income-admin-company" class="filter-select" title="Компания">
-        <option value="all">Все компании</option>
-        ${companies.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("")}
-      </select>
-      <button type="button" class="btn btn-secondary btn-sm filters-reset" id="income-admin-clear">Снять все фильтры</button>
-    </div>
-    <div class="table-wrap">
-      <table class="data">
-        <thead>
-          <tr>
-            <th>№</th><th>Дата</th><th>Автор</th><th>Тип</th><th>Компания</th><th>Основание</th><th>Сумма</th><th>Статус</th><th></th>
-          </tr>
-        </thead>
-        <tbody id="income-admin-body"></tbody>
-      </table>
-    </div>
-  `;
-
-  const paint = () => {
-    const q = document.getElementById("income-admin-search").value.toLowerCase().trim();
-    const status = document.getElementById("income-admin-status").value;
-    const company = document.getElementById("income-admin-company").value;
-    let list = adminIncomes().slice();
-    if (status !== "all") list = list.filter((r) => r.status === status);
-    if (company !== "all") list = list.filter((r) => r.company === company);
-    if (q) {
-      list = list.filter(
-        (r) =>
-          String(r.id).includes(q) ||
-          incomeAuthorName(r).toLowerCase().includes(q) ||
-          (r.purpose || "").toLowerCase().includes(q) ||
-          (r.company || "").toLowerCase().includes(q) ||
-          incomeTypeLabel(r).toLowerCase().includes(q) ||
-          (r.fromName || "").toLowerCase().includes(q)
-      );
-    }
-
-    document.getElementById("income-admin-body").innerHTML = list.length
-      ? list
-          .map((r) => {
-            const sub = [r.fromName ? `от: ${r.fromName}` : "", r.procedure ? `процедура: ${r.procedure}` : ""]
-              .filter(Boolean)
-              .join(" · ");
-            return `<tr>
-              <td>${r.id}</td>
-              <td>${formatDate(r.date)}</td>
-              <td>${escapeHtml(incomeAuthorName(r))}</td>
-              <td>${escapeHtml(incomeTypeLabel(r))}</td>
-              <td>${escapeHtml(r.company || "—")}</td>
-              <td>
-                <div class="dict-primary">
-                  <div class="dict-name">${escapeHtml(r.purpose || "—")}</div>
-                  ${sub ? `<div class="dict-sub">${escapeHtml(sub)}</div>` : ""}
-                </div>
-              </td>
-              <td class="money">${money(r.amount)}</td>
-              <td>${badge(r.status)}</td>
-              <td><button type="button" class="btn btn-secondary btn-sm" data-open-income="${r.id}">Открыть</button></td>
-            </tr>`;
-          })
-          .join("")
-      : `<tr><td colspan="9" class="empty">${
-          status === "На проверке"
-            ? "Нет приходов на проверке. Пользователь должен нажать «Отправить на проверку», а не только сохранить черновик."
-            : rows.length
-              ? "Ничего не найдено"
-              : "Приходов пока нет"
-        }</td></tr>`;
-
-    document.querySelectorAll("[data-open-income]").forEach((btn) => {
-      btn.addEventListener("click", () => openIncomeModal(btn.dataset.openIncome));
-    });
-  };
-
-  document.getElementById("income-admin-search").addEventListener("input", paint);
-  ["income-admin-status", "income-admin-company"].forEach((id) => {
-    document.getElementById(id).addEventListener("change", paint);
-  });
-  document.getElementById("income-admin-clear").addEventListener("click", () => {
-    document.getElementById("income-admin-search").value = "";
-    document.getElementById("income-admin-status").value = "На проверке";
-    document.getElementById("income-admin-company").value = "all";
-    paint();
-  });
-  paint();
 }
 
 function paintFundsIncomeTable() {
@@ -3913,7 +4190,7 @@ function renderFunds() {
             <span class="icon">${icons.inflow}</span>
             <span class="funds-collapse-copy">
               <strong>Приходы</strong>
-              <span class="funds-block-hint">Черновик → на проверку → администратор примет или отклонит. В сводках учитываются только принятые</span>
+              <span class="funds-block-hint">Проверка → «К сдаче» или сразу «Зачислен» в движении ДС. В сводках — оба статуса после подтверждения админом</span>
             </span>
           </button>
           <div class="funds-block-aside">
@@ -3942,7 +4219,8 @@ function renderFunds() {
                 <option value="all" selected>Все статусы</option>
                 <option value="Черновик">Черновик</option>
                 <option value="На проверке">На проверке</option>
-                <option value="Принят">Принят</option>
+                <option value="К сдаче">К сдаче</option>
+                <option value="Зачислен">Зачислен</option>
                 <option value="Отклонён">Отклонён</option>
                 <option value="Архив">Архив</option>
               </select>
@@ -4036,9 +4314,14 @@ function renderMyReports() {
       С проверки можно отозвать отчёт обратно в черновик. Отклонённый отчёт не редактируется.
       Готовые и отправленные отчёты также можно смотреть в разделе «Сводка отчётов».
     </div>
-    <div class="toolbar">
-      <input class="search" placeholder="Поиск по названию или компании" id="my-report-search" />
-      <button type="button" class="btn btn-primary" id="btn-new-report">Создать отчёт</button>
+    <div class="filters-stack">
+      <div class="search-wrap filters-search">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <input class="search" id="my-report-search" placeholder="Поиск по названию или компании" autocomplete="off" />
+      </div>
+      <div class="filters-bar">
+        <button type="button" class="btn btn-primary btn-sm filters-reset" id="btn-new-report" style="margin-left:auto">Создать отчёт</button>
+      </div>
     </div>
     <div class="list-cards" id="my-reports-list">
       ${myReportCards(myReports())}
@@ -5000,7 +5283,7 @@ try {
     }
     if (e.key === USER_INCOMES_STORE_KEY) {
       loadUserIncomes();
-      if (state.role === "admin" && state.page === "incomes") renderIncomesAdmin();
+      if (state.role === "admin" && (state.page === "receipts" || state.page === "incomes")) renderReceipts();
       if (state.role === "user" && (state.page === "funds" || state.page === "home")) render();
     }
   });
