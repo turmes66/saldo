@@ -16,21 +16,24 @@ const icons = {
 
 const state = {
   role: null, // admin | user
+  userId: null,
+  sessionEpoch: null,
   page: "home",
   dictTab: "companies",
   users: [
-    { id: 1, lastName: "Балашова", firstName: "Юлия", middleName: "Алексеевна", email: "y.balashova@example.com", phone: "+7 (900) 111-22-33", role: "Администратор", status: "Активен", created: "2026-01-12", password: "demo", mustResetPassword: false },
-    { id: 2, lastName: "Петров", firstName: "Иван", middleName: "Алексеевич", email: "i.petrov@example.com", phone: "+7 (900) 222-33-44", role: "Пользователь", status: "Активен", created: "2026-02-03", password: "demo", mustResetPassword: false },
-    { id: 3, lastName: "Смирнова", firstName: "Анна", middleName: "Игоревна", email: "a.smirnova@example.com", phone: "+7 (900) 333-44-55", role: "Пользователь", status: "Заблокирован", created: "2026-03-18", password: "demo", mustResetPassword: false },
-    { id: 4, lastName: "Козлов", firstName: "Сергей", middleName: "Петрович", email: "s.kozlov@example.com", phone: "+7 (900) 444-55-66", role: "Пользователь", status: "Активен", created: "2026-05-21", password: "demo", mustResetPassword: false },
-    { id: 5, lastName: "Орлова", firstName: "Мария", middleName: "", email: "m.orlova@example.com", phone: "+7 (900) 555-66-77", role: "Пользователь", status: "Активен", created: "2026-06-09", password: "demo", mustResetPassword: false },
-    { id: 6, lastName: "Волков", firstName: "Дмитрий", middleName: "Николаевич", email: "d.volkov@example.com", phone: "+7 (900) 666-77-88", role: "Пользователь", status: "Активен", created: "2026-07-14", password: "demo", mustResetPassword: false },
-    { id: 7, lastName: "Новикова", firstName: "Елена", middleName: "Викторовна", email: "e.novikova@example.com", phone: "+7 (900) 777-88-99", role: "Пользователь", status: "Активен", created: "2026-08-01", password: "demo", mustResetPassword: false },
+    { id: 1, lastName: "Балашова", firstName: "Юлия", middleName: "Алексеевна", email: "y.balashova@example.com", phone: "+7 (900) 111-22-33", role: "Администратор", status: "Активен", created: "2026-01-12", password: "demo", mustResetPassword: false, sessionEpoch: 0 },
+    { id: 2, lastName: "Петров", firstName: "Иван", middleName: "Алексеевич", email: "i.petrov@example.com", phone: "+7 (900) 222-33-44", role: "Пользователь", status: "Активен", created: "2026-02-03", password: "demo", mustResetPassword: false, sessionEpoch: 0 },
+    { id: 3, lastName: "Смирнова", firstName: "Анна", middleName: "Игоревна", email: "a.smirnova@example.com", phone: "+7 (900) 333-44-55", role: "Пользователь", status: "Заблокирован", created: "2026-03-18", password: "demo", mustResetPassword: false, sessionEpoch: 0 },
+    { id: 4, lastName: "Козлов", firstName: "Сергей", middleName: "Петрович", email: "s.kozlov@example.com", phone: "+7 (900) 444-55-66", role: "Пользователь", status: "Активен", created: "2026-05-21", password: "demo", mustResetPassword: false, sessionEpoch: 0 },
+    { id: 5, lastName: "Орлова", firstName: "Мария", middleName: "", email: "m.orlova@example.com", phone: "+7 (900) 555-66-77", role: "Пользователь", status: "Активен", created: "2026-06-09", password: "demo", mustResetPassword: false, sessionEpoch: 0 },
+    { id: 6, lastName: "Волков", firstName: "Дмитрий", middleName: "Николаевич", email: "d.volkov@example.com", phone: "+7 (900) 666-77-88", role: "Пользователь", status: "Активен", created: "2026-07-14", password: "demo", mustResetPassword: false, sessionEpoch: 0 },
+    { id: 7, lastName: "Новикова", firstName: "Елена", middleName: "Викторовна", email: "e.novikova@example.com", phone: "+7 (900) 777-88-99", role: "Пользователь", status: "Активен", created: "2026-08-01", password: "demo", mustResetPassword: false, sessionEpoch: 0 },
   ],
   issues: [
-    { id: 101, userId: 2, recipientType: "user", amount: 100000, date: "2026-07-02", used: 85000, rest: 15000, purpose: "Командировка", company: "ССПБ", procedure: "", note: "Командировка / хоз. нужды", status: "Активна", createdByName: "Балашова Юлия Алексеевна" },
-    { id: 102, userId: 4, recipientType: "user", amount: 45000, date: "2026-07-20", used: 12000, rest: 33000, purpose: "Оплата услуг", company: "ССПБ", procedure: "Дело А40-112", note: "Процедура № А40-112", status: "Активна", createdByName: "Балашова Юлия Алексеевна" },
-    { id: 103, userId: 3, recipientType: "user", amount: 20000, date: "2026-06-11", used: 20000, rest: 0, purpose: "", company: "", procedure: "", note: "Транспортные расходы", status: "Активна", createdByName: "Балашова Юлия Алексеевна" },
+    { id: 101, userId: 2, recipientType: "user", amount: 100000, date: "2026-07-02", used: 100000, rest: 0, purpose: "Командировка", company: "ССПБ", procedure: "", note: "Командировка / хоз. нужды", status: "Активна", issueKind: "targeted", createdByName: "Балашова Юлия Алексеевна" },
+    { id: 102, userId: 4, recipientType: "user", amount: 45000, date: "2026-07-20", used: 12000, rest: 33000, purpose: "Оплата услуг", company: "ССПБ", procedure: "Дело А40-112", note: "Процедура № А40-112", status: "Активна", issueKind: "targeted", createdByName: "Балашова Юлия Алексеевна" },
+    { id: 103, userId: 3, recipientType: "user", amount: 20000, date: "2026-06-11", used: 20000, rest: 0, purpose: "", company: "", procedure: "", note: "Транспортные расходы", status: "Активна", issueKind: "untargeted", createdByName: "Балашова Юлия Алексеевна" },
+    { id: 104, userId: 2, recipientType: "user", amount: 30000, date: "2026-08-05", used: 0, rest: 30000, purpose: "Пополнение баланса", company: "ССПБ", procedure: "", note: "Выдача от администратора", status: "Активна", issueKind: "untargeted", createdByName: "Балашова Юлия Алексеевна" },
   ],
   receipts: [
     {
@@ -43,6 +46,7 @@ const state = {
       purpose: "Финансирование операционной деятельности",
       note: "Перечисление от компании",
       status: "Активна",
+      issueId: null,
       createdByName: "Балашова Юлия Алексеевна",
     },
     {
@@ -53,8 +57,9 @@ const state = {
       amount: 15000,
       date: "2026-08-05",
       purpose: "Возврат неиспользованных средств",
-      note: "Возврат остатка по выдаче",
+      note: "Возврат остатка по выдаче № 101",
       status: "Активна",
+      issueId: 101,
       createdByName: "Балашова Юлия Алексеевна",
     },
     {
@@ -67,6 +72,7 @@ const state = {
       purpose: "Целевое финансирование",
       note: "",
       status: "Активна",
+      issueId: null,
       createdByName: "Балашова Юлия Алексеевна",
     },
   ],
@@ -76,9 +82,25 @@ const state = {
       userId: 2,
       amount: 35000,
       date: "2026-08-03",
-      source: "Продажа",
-      purpose: "Продажа офисной техники",
-      note: "Ноутбук и монитор",
+      type: "asset_sale",
+      company: "ССПБ",
+      fromName: "",
+      purpose: "Ноутбук и монитор",
+      procedure: "",
+      note: "Продажа списанной офисной техники",
+      status: "Активна",
+    },
+    {
+      id: 302,
+      userId: 2,
+      amount: 12000,
+      date: "2026-08-11",
+      type: "counterparty",
+      company: "ССПБ",
+      fromName: "ООО «Север»",
+      purpose: "Оплата услуг по сопровождению",
+      procedure: "Дело А40-88",
+      note: "",
       status: "Активна",
     },
   ],
@@ -94,6 +116,7 @@ const state = {
       status: "На проверке",
       date: "2026-08-01",
       source: "Из полученной выдачи",
+      issueId: 101,
       reviewComment: "",
     },
     {
@@ -107,6 +130,7 @@ const state = {
       status: "Утверждён",
       date: "2026-08-04",
       source: "Из полученной выдачи",
+      issueId: 101,
       reviewComment: "",
     },
     {
@@ -120,6 +144,7 @@ const state = {
       status: "На доработке",
       date: "2026-08-08",
       source: "Из полученной выдачи",
+      issueId: 102,
       reviewComment: "Укажите подтверждающие документы и уточните назначение платежа.",
     },
     {
@@ -133,13 +158,11 @@ const state = {
       status: "Черновик",
       date: "2026-08-10",
       source: "Из полученной выдачи",
+      issueId: 104,
       reviewComment: "",
     },
   ],
-  myFunds: [
-    { id: 101, amount: 100000, date: "2026-07-02", used: 85000, rest: 15000, note: "Выдача от администратора" },
-    { id: 104, amount: 30000, date: "2026-08-05", used: 0, rest: 30000, note: "Выдача от администратора" },
-  ],
+  myFunds: [],
   dicts: {
     companies: [
       { id: 1, name: "ССПБ", status: "Активна" },
@@ -227,11 +250,12 @@ function formatAmount(n) {
   }).format(Number(n) || 0);
 }
 
-/** Разбор "50 000,00" / "50000.00" → number */
+/** Разбор "50 000,00" / "50000.00" → number; пустая строка → NaN */
 function parseAmount(value) {
   const raw = String(value || "")
     .replace(/\s/g, "")
     .replace(",", ".");
+  if (!raw) return NaN;
   const num = Number(raw);
   return Number.isFinite(num) ? Math.round(num * 100) / 100 : NaN;
 }
@@ -300,24 +324,160 @@ function badge(status) {
     Архив: "neutral",
     "На проверке": "warn",
     Утверждён: "ok",
+    Выплачено: "ok",
     Завершён: "ok",
     Черновик: "neutral",
     "На доработке": "rework",
+    Отклонён: "off",
   };
   return `<span class="badge ${map[status] || "neutral"}">${status}</span>`;
 }
 
+function userById(id) {
+  return state.users.find((u) => u.id === Number(id)) || null;
+}
+
 function currentUserId() {
-  return state.role === "admin" ? 1 : 2;
+  return state.userId || null;
+}
+
+function currentUser() {
+  return userById(currentUserId());
 }
 
 function currentActor() {
-  const u = userById(currentUserId());
+  const u = currentUser();
   return {
     actorId: currentUserId(),
     actorName: u ? fullName(u) : state.role === "admin" ? "Администратор" : "Пользователь",
     actorRole: state.role || "guest",
   };
+}
+
+function bumpSession(user) {
+  if (!user) return;
+  user.sessionEpoch = (Number(user.sessionEpoch) || 0) + 1;
+  persistSessionEpochs();
+}
+
+const SESSION_EPOCH_KEY = "saldo_session_epochs_v1";
+const AUTH_SESSION_KEY = "saldo_auth_session_v1";
+
+function persistSessionEpochs() {
+  try {
+    const map = {};
+    state.users.forEach((u) => {
+      map[u.id] = Number(u.sessionEpoch) || 0;
+    });
+    localStorage.setItem(SESSION_EPOCH_KEY, JSON.stringify(map));
+  } catch {
+    /* ignore */
+  }
+}
+
+function loadSessionEpochs() {
+  try {
+    const raw = localStorage.getItem(SESSION_EPOCH_KEY);
+    if (!raw) return;
+    const map = JSON.parse(raw);
+    state.users.forEach((u) => {
+      if (map[u.id] != null) u.sessionEpoch = Number(map[u.id]) || 0;
+    });
+  } catch {
+    /* ignore */
+  }
+}
+
+function persistAuthSession() {
+  try {
+    if (!state.userId || !state.role) {
+      sessionStorage.removeItem(AUTH_SESSION_KEY);
+      return;
+    }
+    sessionStorage.setItem(
+      AUTH_SESSION_KEY,
+      JSON.stringify({
+        userId: state.userId,
+        sessionEpoch: state.sessionEpoch,
+        role: state.role,
+      })
+    );
+  } catch {
+    /* ignore */
+  }
+}
+
+function clearAuthSession() {
+  try {
+    sessionStorage.removeItem(AUTH_SESSION_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
+function startSession(user) {
+  bumpSession(user);
+  state.userId = user.id;
+  state.sessionEpoch = user.sessionEpoch;
+  state.role = user.role === "Администратор" ? "admin" : "user";
+  persistAuthSession();
+}
+
+function invalidateUserSession(user, { logoutIfCurrent = true, message } = {}) {
+  if (!user) return;
+  bumpSession(user);
+  if (logoutIfCurrent && state.userId === user.id) {
+    forceLogout(message || "Сессия завершена администратором. Войдите снова.");
+  }
+}
+
+function forceLogout(message) {
+  const hadRole = Boolean(state.role);
+  state.role = null;
+  state.userId = null;
+  state.sessionEpoch = null;
+  clearAuthSession();
+  els.app.classList.add("hidden");
+  els.app.setAttribute("aria-hidden", "true");
+  els.login.classList.remove("hidden");
+  closeModal();
+  closeAppDialog();
+  if (hadRole && message) showAlert(message, "Сессия завершена");
+}
+
+/** Проверка сессии: кик, блок, сброс пароля админом */
+function assertSession() {
+  if (!state.role || !state.userId) return false;
+  const u = currentUser();
+  if (!u) {
+    forceLogout("Учётная запись не найдена.");
+    return false;
+  }
+  if (u.status === "Заблокирован") {
+    forceLogout("Учётная запись заблокирована. Обратитесь к администратору.");
+    return false;
+  }
+  if ((Number(u.sessionEpoch) || 0) !== Number(state.sessionEpoch)) {
+    forceLogout("Сессия завершена администратором. Войдите снова.");
+    return false;
+  }
+  if (u.mustResetPassword || !u.password) {
+    forceLogout("Пароль сброшен администратором. Получите новый пароль у администратора.");
+    return false;
+  }
+  const expectedRole = u.role === "Администратор" ? "admin" : "user";
+  if (state.role !== expectedRole) {
+    state.role = expectedRole;
+  }
+  return true;
+}
+
+function isCompensationSource(source) {
+  return String(source || "").toLowerCase().includes("собственн");
+}
+
+function isIssueSource(source) {
+  return String(source || "").includes("выдачи");
 }
 
 function isIssueActive(issue) {
@@ -357,6 +517,11 @@ function activityActionLabel(action) {
     submit: "Отправка",
     approve: "Утверждение",
     rework: "Возврат на доработку",
+    reject: "Отклонение",
+    withdraw: "Отзыв",
+    pay: "Выплата",
+    return_funds: "Возврат средств",
+    delete: "Удаление",
   };
   return map[action] || action;
 }
@@ -366,7 +531,7 @@ function activityEntityLabel(entity) {
     issue: "Выдача",
     receipt: "Поступление",
     report: "Отчёт",
-    income: "Доход",
+    income: "Приход",
     user: "Пользователь",
     dict: "Справочник",
     session: "Сессия",
@@ -414,22 +579,55 @@ function canUserEdit(r) {
   return r.status === "Черновик" || r.status === "На доработке";
 }
 
-/** Выдано / в отчётах / остаток по пользователю (архивные выдачи не учитываются) */
-function userFundSummary(userId) {
-  const issued = activeIssues()
-    .filter((i) => i.recipientType !== "company" && i.userId === Number(userId))
-    .reduce((s, i) => s + Number(i.amount || 0), 0);
+function reportCountsAgainstIssue(r) {
+  if (!r) return false;
+  if (r.status === "Черновик" || r.status === "Отклонён") return false;
+  if (!isIssueSource(r.source)) return false;
+  if (!r.issueId) return false;
+  return true;
+}
 
-  // Черновики не считаем распределёнными — только отправленные и дальше по статусу
-  const allocated = state.reports
+function issueAllocatedByReports(issueId, excludeReportId = null) {
+  return state.reports
     .filter(
       (r) =>
-        r.authorId === Number(userId) &&
-        r.status !== "Черновик" &&
-        String(r.source || "").includes("выдачи")
+        Number(r.issueId) === Number(issueId) &&
+        reportCountsAgainstIssue(r) &&
+        (!excludeReportId || r.id !== excludeReportId)
     )
     .reduce((s, r) => s + Number(r.sum || 0), 0);
+}
 
+function issueReturnedAmount(issueId, excludeReceiptId = null) {
+  return activeReceipts()
+    .filter(
+      (r) =>
+        Number(r.issueId) === Number(issueId) &&
+        (!excludeReceiptId || r.id !== excludeReceiptId)
+    )
+    .reduce((s, r) => s + Number(r.amount || 0), 0);
+}
+
+function issueUsage(issueId, { excludeReportId = null, excludeReceiptId = null } = {}) {
+  const used =
+    issueAllocatedByReports(issueId, excludeReportId) + issueReturnedAmount(issueId, excludeReceiptId);
+  return Math.round(used * 100) / 100;
+}
+
+function issueAvailableRest(issueId, { excludeReportId = null, excludeReceiptId = null } = {}) {
+  const issue = state.issues.find((i) => i.id === Number(issueId));
+  if (!issue || !isIssueActive(issue)) return 0;
+  const used = issueUsage(issueId, { excludeReportId, excludeReceiptId });
+  return Math.max(0, Math.round((Number(issue.amount || 0) - used) * 100) / 100);
+}
+
+/** Выдано / в отчётах и возвратах / остаток по пользователю (архивные выдачи не учитываются) */
+function userFundSummary(userId) {
+  const issues = activeIssues().filter(
+    (i) => i.recipientType !== "company" && i.userId === Number(userId)
+  );
+  const issued = issues.reduce((s, i) => s + Number(i.amount || 0), 0);
+  const allocated = issues.reduce((s, i) => s + issueUsage(i.id), 0);
   const rest = Math.max(0, Math.round((issued - allocated) * 100) / 100);
   return {
     issued: Math.round(issued * 100) / 100,
@@ -439,29 +637,18 @@ function userFundSummary(userId) {
 }
 
 function syncIssueBalancesForUser(userId) {
-  const { allocated } = userFundSummary(userId);
-  let leftToAllocate = allocated;
-  const userIssues = activeIssues()
-    .filter((i) => i.userId === Number(userId))
-    .sort((a, b) => a.id - b.id);
+  const userIssues = state.issues.filter(
+    (i) => i.userId === Number(userId) && i.recipientType !== "company"
+  );
   userIssues.forEach((issue) => {
-    const use = Math.min(issue.amount, leftToAllocate);
-    issue.used = Math.round(use * 100) / 100;
-    issue.rest = Math.round((issue.amount - issue.used) * 100) / 100;
-    leftToAllocate = Math.round((leftToAllocate - use) * 100) / 100;
+    const used = issueUsage(issue.id);
+    issue.used = Math.min(Number(issue.amount || 0), used);
+    issue.rest = Math.round((Number(issue.amount || 0) - issue.used) * 100) / 100;
   });
 
-  // архивные не участвуют в остатке
-  state.issues
-    .filter((i) => i.userId === Number(userId) && !isIssueActive(i))
-    .forEach((issue) => {
-      issue.used = 0;
-      issue.rest = 0;
-    });
-
-  // зеркало для кабинета пользователя (демо: id=2)
-  if (Number(userId) === 2) {
-    state.myFunds = userIssues.map((i) => ({
+  state.myFunds = userIssues
+    .filter(isIssueActive)
+    .map((i) => ({
       id: i.id,
       amount: i.amount,
       date: i.date,
@@ -470,18 +657,41 @@ function syncIssueBalancesForUser(userId) {
       note: i.note || "Выдача от администратора",
       status: i.status || "Активна",
     }));
-  }
 }
 
 function usersFundRows() {
-  const ids = [...new Set(activeIssues().filter((i) => i.recipientType !== "company" && i.userId).map((i) => i.userId))];
+  const ids = [
+    ...new Set(
+      activeIssues()
+        .filter((i) => i.recipientType !== "company" && i.userId)
+        .map((i) => i.userId)
+    ),
+  ];
   return ids
     .map((id) => {
       const u = userById(id);
+      syncIssueBalancesForUser(id);
       const s = userFundSummary(id);
       return { userId: id, name: u ? fullName(u) : `Пользователь #${id}`, ...s };
     })
     .sort((a, b) => b.rest - a.rest);
+}
+
+function activeIssuesForUser(userId, { withRestOnly = false, includeIssueId = null } = {}) {
+  return activeIssues()
+    .filter((i) => i.recipientType !== "company" && i.userId === Number(userId))
+    .filter((i) => {
+      if (includeIssueId && Number(i.id) === Number(includeIssueId)) return true;
+      if (!withRestOnly) return true;
+      return issueAvailableRest(i.id) > 0.001;
+    })
+    .sort((a, b) => String(b.date).localeCompare(String(a.date)) || b.id - a.id);
+}
+
+function issueOptionLabel(issue, { excludeReportId = null, excludeReceiptId = null } = {}) {
+  const rest = issueAvailableRest(issue.id, { excludeReportId, excludeReceiptId });
+  const purpose = issue.purpose || issue.note || "Без назначения";
+  return `№ ${issue.id} · ${purpose} · остаток ${money(rest)} · ${issue.date}`;
 }
 
 function fundProgress(rest, issued) {
@@ -517,7 +727,7 @@ function tryLogin(email, password) {
     showAlert("Неверный e-mail или пароль.", "Вход не выполнен");
     return false;
   }
-  enter(user.role === "Администратор" ? "admin" : "user");
+  enter(user);
   logActivity({
     action: "login",
     entity: "session",
@@ -533,7 +743,8 @@ async function resetAllUserPasswords() {
     `Сбросить пароли всех пользователей (${count})?\n\n` +
       "После этого никто не сможет войти со старым паролем.\n" +
       "Отчёты, выдачи и данные пользователей не удаляются.\n" +
-      "Учётные записи не блокируются — администратор сможет выдать новые пароли точечно.",
+      "Учётные записи не блокируются — администратор сможет выдать новые пароли точечно.\n" +
+      "Все активные сессии будут завершены.",
     "Сброс всех паролей"
   );
   if (!ok) return;
@@ -541,47 +752,49 @@ async function resetAllUserPasswords() {
   state.users.forEach((u) => {
     u.password = "";
     u.mustResetPassword = true;
+    bumpSession(u);
   });
 
-  const admin = state.users.find((u) => u.id === 1);
+  const admin = state.users.find((u) => u.id === state.userId) || state.users.find((u) => u.role === "Администратор");
   const temp = "TempAdmin24";
   if (admin) {
     admin.password = temp;
     admin.mustResetPassword = false;
+    bumpSession(admin);
+    state.sessionEpoch = admin.sessionEpoch;
+    state.userId = admin.id;
   }
 
   logActivity({
     action: "reset_password",
     entity: "user",
     entityLabel: "Все пользователи",
-    detail: `Массовый сброс паролей (${count}). Администратору выдан временный пароль.`,
+    detail: `Массовый сброс паролей (${count}). Администратору выдан временный пароль. Сессии завершены.`,
   });
 
   await showAlert(
     `Пароли сброшены у ${count} пользователей.\n\n` +
-      "Данные и отчёты сохранены.\n" +
+      "Данные и отчёты сохранены. Сессии других пользователей завершены.\n" +
       `Временный пароль администратора (${admin?.email || "admin"}): ${temp}\n` +
       "Остальным выдайте новый пароль через «Сброс пароля» в строке пользователя.",
     "Пароли сброшены"
   );
 }
 
-function enter(role) {
+function enter(user) {
   try {
-    state.role = role;
+    startSession(user);
     state.page = "home";
     els.login.classList.add("hidden");
     els.app.classList.remove("hidden");
     els.app.setAttribute("aria-hidden", "false");
 
-    if (role === "admin") {
-      els.userName.textContent = "Балашова Юлия Алексеевна";
-      els.userRole.textContent = "Администратор";
-    } else {
-      els.userName.textContent = "Петров Иван Алексеевич";
-      els.userRole.textContent = "Пользователь";
-    }
-    [...new Set(state.issues.filter((i) => i.recipientType !== "company" && i.userId).map((i) => i.userId))].forEach(syncIssueBalancesForUser);
+    els.userName.textContent = fullName(user);
+    els.userRole.textContent = user.role;
+
+    [...new Set(state.issues.filter((i) => i.recipientType !== "company" && i.userId).map((i) => i.userId))].forEach(
+      syncIssueBalancesForUser
+    );
     renderNav();
     render();
   } catch (err) {
@@ -600,6 +813,9 @@ function logout() {
     });
   }
   state.role = null;
+  state.userId = null;
+  state.sessionEpoch = null;
+  clearAuthSession();
   els.app.classList.add("hidden");
   els.app.setAttribute("aria-hidden", "true");
   els.login.classList.remove("hidden");
@@ -625,9 +841,9 @@ function renderNav() {
     `;
   } else {
     els.nav.innerHTML = `
-      ${navButton("funds", "Мои средства", icons.wallet, p === "funds")}
-      ${navButton("my-income", "Мой доход", icons.inflow, p === "my-income")}
-      ${navButton("my-reports", "Мои отчёты", icons.report, p === "my-reports")}
+      ${navButton("funds", "Мои средства", icons.wallet, p === "funds" || p === "my-income")}
+      ${navButton("my-reports", "Создание отчётов", icons.report, p === "my-reports")}
+      ${navButton("report-summary", "Сводка отчётов", icons.doc, p === "report-summary")}
     `;
   }
 
@@ -645,6 +861,7 @@ function setTitle(t) {
 }
 
 function render() {
+  if (state.role && !assertSession()) return;
   const page = state.page;
   if (state.role === "admin") {
     if (page === "home") return renderAdminHome();
@@ -658,9 +875,9 @@ function render() {
     if (page === "history") return renderActivityLog();
   } else {
     if (page === "home") return renderUserHome();
-    if (page === "funds") return renderFunds();
-    if (page === "my-income") return renderMyIncome();
+    if (page === "funds" || page === "my-income") return renderFunds();
     if (page === "my-reports") return renderMyReports();
+    if (page === "report-summary") return renderReportSummary();
   }
 }
 
@@ -773,7 +990,8 @@ function renderUserHome() {
   setTitle("Главная");
   const funds = userFundSummary(currentUserId());
   const draftLike = myReports().filter((r) => r.status === "Черновик" || r.status === "На доработке" || r.status === "На проверке").length;
-  const incomeTotal = myActiveIncomes().reduce((s, r) => s + Number(r.amount || 0), 0);
+  const incomeMonth = myActiveIncomesThisMonth().reduce((s, r) => s + Number(r.amount || 0), 0);
+  const monthLabel = formatMonthLabel();
 
   els.content.innerHTML = `
     <div class="grid-2">
@@ -787,12 +1005,12 @@ function renderUserHome() {
         <button type="button" class="btn btn-primary" style="margin-top:14px" data-go="funds">Мои средства</button>
       </div>
       <div class="card">
-        <h3 class="widget-title">${icons.inflow} Мой доход</h3>
+        <h3 class="widget-title">${icons.inflow} Принятые поступления</h3>
         <div class="stat" style="padding:0">
-          <div class="value">${money(incomeTotal)}</div>
-          <div class="hint">записано лично · например, продажи</div>
+          <div class="value">${money(incomeMonth)}</div>
+          <div class="hint">за ${monthLabel.toLowerCase()} · деньги бизнеса, принятые вами</div>
         </div>
-        <button type="button" class="btn btn-secondary" style="margin-top:14px" data-go="my-income">Записать доход</button>
+        <button type="button" class="btn btn-secondary" style="margin-top:14px" data-action="new-income">Зарегистрировать приход</button>
       </div>
     </div>
 
@@ -809,22 +1027,22 @@ function renderUserHome() {
         </button>
         <button type="button" class="product-card g2" data-action="new-income">
           <span class="pc-icon">${icons.inflow}</span>
-          <strong>Записать доход</strong>
-          <p>Продажа, возврат или иной личный приход средств.</p>
+          <strong>Зарегистрировать приход</strong>
+          <p>Оплата от контрагента, поступление по процедуре или продажа имущества компании.</p>
           <span class="pc-go">Добавить</span>
         </button>
-        <button type="button" class="product-card g4" data-go="my-reports">
+        <button type="button" class="product-card g4" data-go="report-summary">
           <span class="pc-icon">${icons.doc}</span>
-          <strong>Мои отчёты</strong>
-          <p>Черновики, проверка и завершённые отчёты · сейчас в работе: ${draftLike}</p>
+          <strong>Сводка отчётов</strong>
+          <p>Просмотр по периоду и статусам · в работе: ${draftLike}</p>
           <span class="pc-go">Перейти</span>
         </button>
       </div>
     </div>
   `;
   bindGo();
-  document.querySelector("[data-action='new-report']")?.addEventListener("click", openNewReportModal);
-  document.querySelector("[data-action='new-income']")?.addEventListener("click", openMyIncomeModal);
+  document.querySelectorAll("[data-action='new-report']").forEach((el) => el.addEventListener("click", openNewReportModal));
+  document.querySelectorAll("[data-action='new-income']").forEach((el) => el.addEventListener("click", openMyIncomeModal));
 }
 
 function reportsTable(rows) {
@@ -874,7 +1092,8 @@ function renderReportsAdmin() {
   els.content.innerHTML = `
     <div class="workflow-hint card soft">
       <strong>Согласование отчётов.</strong>
-      Пользователь отправляет отчёт на проверку → вы утверждаете или возвращаете на доработку с комментарием.
+      Пользователь отправляет отчёт на проверку → вы утверждаете, возвращаете на доработку или отклоняете с комментарием.
+      Для компенсации из своих средств после утверждения доступен статус «Выплачено».
       Сейчас на проверке: <strong>${awaiting}</strong>
     </div>
     <div class="filters-bar">
@@ -887,6 +1106,8 @@ function renderReportsAdmin() {
         <option value="На проверке">На проверке</option>
         <option value="На доработке">На доработке</option>
         <option value="Утверждён">Утверждён</option>
+        <option value="Выплачено">Выплачено</option>
+        <option value="Отклонён">Отклонён</option>
       </select>
       <select id="filter-company" class="filter-select" title="Компания">
         <option value="all">Все компании</option>
@@ -937,10 +1158,6 @@ function renderReportsAdmin() {
   });
 
   paint();
-}
-
-function userById(id) {
-  return state.users.find((u) => u.id === Number(id));
 }
 
 function issueRecipientName(issue) {
@@ -1000,7 +1217,16 @@ function issueRows(rows) {
         <td>${archived ? "—" : money(i.used)}</td>
         <td class="money">${archived ? "—" : money(i.rest)}</td>
         <td>${i.date}</td>
-        <td>${i.purpose || "—"}</td>
+        <td>
+          <div class="dict-primary">
+            <div class="dict-name">${i.purpose || "—"}</div>
+            ${
+              i.issueKind
+                ? `<div class="dict-sub">${i.issueKind === "targeted" ? "Целевая" : "Нецелевая"}</div>`
+                : ""
+            }
+          </div>
+        </td>
         <td>${i.company || "—"}</td>
         <td>${i.procedure || "—"}</td>
         <td>${i.note || "—"}</td>
@@ -1152,12 +1378,17 @@ function openIssueModal() {
       </div>
       <label class="field"><span>Сумма, ₽</span><input name="amount" data-amount inputmode="decimal" required placeholder="0,00" value="50000,00" /></label>
       <label class="field"><span>Дата</span><input name="date" type="date" required value="2026-08-12" /></label>
+      <div class="field full">
+        <span>Тип выдачи</span>
+        <div class="password-mode issue-kind-mode" role="group" aria-label="Тип выдачи">
+          <button type="button" class="password-mode-btn is-active" data-issue-kind="targeted">Целевая</button>
+          <button type="button" class="password-mode-btn" data-issue-kind="untargeted">Нецелевая</button>
+        </div>
+        <input type="hidden" name="issueKind" id="issue-kind" value="targeted" />
+      </div>
       <label class="field full">
-        <span>Назначение <em class="optional-mark">необязательно</em></span>
-        <select name="purpose">
-          <option value="">Не указано</option>
-          ${purposes.map((p) => `<option value="${p.name}">${p.name}</option>`).join("")}
-        </select>
+        <span id="issue-purpose-label">Назначение</span>
+        <select name="purpose" id="issue-purpose" required></select>
       </label>
       <label class="field">
         <span>Компания <em class="optional-mark">необязательно</em></span>
@@ -1174,7 +1405,7 @@ function openIssueModal() {
         </select>
       </label>
       <label class="field full"><span>Комментарий</span><input name="note" placeholder="Дополнительные сведения" value="Оперативные расходы" /></label>
-      <p class="login-hint full" style="grid-column:1/-1">Получателем может быть пользователь или компания. После сохранения поступление отразится у выбранного получателя.</p>
+      <p class="login-hint full" style="grid-column:1/-1">После сохранения поступление отразится у выбранного получателя.</p>
     </form>
     <div class="modal-actions">
       <button type="button" class="btn btn-secondary" data-close>Отмена</button>
@@ -1184,6 +1415,48 @@ function openIssueModal() {
 
   bindAmountInputs(document.getElementById("issue-form"));
   bindRecipientPicker(recipients);
+
+  const kindInput = document.getElementById("issue-kind");
+  const purposeSelect = document.getElementById("issue-purpose");
+  const purposeLabel = document.getElementById("issue-purpose-label");
+
+  const syncIssuePurposeOptions = (kind) => {
+    const prev = purposeSelect.value;
+    if (kind === "untargeted") {
+      purposeLabel.innerHTML = "Назначение";
+      purposeSelect.innerHTML = `
+        <option value="Пополнение баланса">Пополнение баланса</option>
+        <option value="Иное">Иное</option>
+      `;
+      purposeSelect.value = prev === "Иное" ? "Иное" : "Пополнение баланса";
+      purposeSelect.required = true;
+      return;
+    }
+
+    purposeLabel.innerHTML = "Назначение";
+    const options = purposes.length
+      ? purposes.map((p) => `<option value="${escapeHtml(p.name)}">${escapeHtml(p.name)}</option>`).join("")
+      : `<option value="Иное">Иное</option>`;
+    purposeSelect.innerHTML = `<option value="" disabled>Выберите назначение</option>${options}`;
+    if (prev && [...purposeSelect.options].some((o) => o.value === prev && o.value)) {
+      purposeSelect.value = prev;
+    } else {
+      purposeSelect.value = "";
+    }
+    purposeSelect.required = true;
+  };
+
+  document.querySelectorAll("[data-issue-kind]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const kind = btn.dataset.issueKind;
+      kindInput.value = kind;
+      document.querySelectorAll("[data-issue-kind]").forEach((b) => {
+        b.classList.toggle("is-active", b.dataset.issueKind === kind);
+      });
+      syncIssuePurposeOptions(kind);
+    });
+  });
+  syncIssuePurposeOptions("targeted");
 
   document.getElementById("issue-form").addEventListener("submit", (e) => {
     e.preventDefault();
@@ -1200,13 +1473,30 @@ function openIssueModal() {
       return;
     }
 
+    const issueKind = String(fd.get("issueKind") || "targeted");
+    const purpose = String(fd.get("purpose") || "").trim();
+    if (!purpose) {
+      showAlert(
+        issueKind === "targeted"
+          ? "Для целевой выдачи укажите назначение."
+          : "Укажите назначение выдачи.",
+        "Назначение не выбрано"
+      );
+      return;
+    }
+    if (issueKind === "untargeted" && purpose !== "Пополнение баланса" && purpose !== "Иное") {
+      showAlert("Для нецелевой выдачи доступны только «Пополнение баланса» или «Иное».", "Проверьте назначение");
+      return;
+    }
+
     const row = {
       id: 100 + state.issues.length + 1,
       amount,
       date: String(fd.get("date")),
       used: 0,
       rest: amount,
-      purpose: String(fd.get("purpose") || ""),
+      issueKind,
+      purpose,
       company: String(fd.get("company") || ""),
       procedure: String(fd.get("procedure") || ""),
       note: String(fd.get("note") || "—"),
@@ -1224,7 +1514,7 @@ function openIssueModal() {
       action: "create",
       entity: "issue",
       entityLabel: `Выдача № ${row.id}`,
-      detail: `Создана выдача ${money(amount)} для ${issueRecipientName(row)} (${issueRecipientKind(row)})`,
+      detail: `Создана ${issueKind === "targeted" ? "целевая" : "нецелевая"} выдача ${money(amount)} для ${issueRecipientName(row)} (${issueRecipientKind(row)}) · ${purpose}`,
     });
     if (row.userId) syncIssueBalancesForUser(row.userId);
     closeModal();
@@ -1271,6 +1561,7 @@ function bindRecipientPicker(recipients) {
         }
         list.classList.remove("is-open");
         paint(item.label);
+        hidden.dispatchEvent(new Event("change", { bubbles: true }));
       });
     });
   };
@@ -1331,6 +1622,7 @@ function receiptRows(rows) {
         <td class="money">${money(r.amount)}</td>
         <td>${r.date}</td>
         <td>${r.purpose || "—"}</td>
+        <td>${r.issueId ? `Выдача № ${r.issueId}` : "—"}</td>
         <td>${r.note || "—"}</td>
         <td>${badge(archived ? "Архив" : "Активна")}</td>
         <td>
@@ -1366,6 +1658,9 @@ function bindReceiptArchiveActions() {
           ? `Поступление возвращено в учёт (${money(row.amount)}) от ${receiptPayerName(row)}`
           : `Поступление архивировано (${money(row.amount)}) от ${receiptPayerName(row)}`,
       });
+      if (row.issueId && row.payerType === "user" && row.payerId) {
+        syncIssueBalancesForUser(row.payerId);
+      }
       renderReceipts();
     });
   });
@@ -1418,7 +1713,7 @@ function renderReceipts() {
       <table class="data">
         <thead>
           <tr>
-            <th>ID</th><th>От кого</th><th>Сумма</th><th>Дата</th><th>Назначение</th><th>Комментарий</th><th>Статус</th><th></th>
+            <th>ID</th><th>От кого</th><th>Сумма</th><th>Дата</th><th>Назначение</th><th>Выдача</th><th>Комментарий</th><th>Статус</th><th></th>
           </tr>
         </thead>
         <tbody id="receipts-body"></tbody>
@@ -1444,7 +1739,7 @@ function renderReceipts() {
 
     document.getElementById("receipts-body").innerHTML = list.length
       ? receiptRows(list)
-      : `<tr><td colspan="8" class="empty">Нет поступлений по выбранным фильтрам</td></tr>`;
+      : `<tr><td colspan="9" class="empty">Нет поступлений по выбранным фильтрам</td></tr>`;
     bindReceiptArchiveActions();
   };
 
@@ -1481,9 +1776,16 @@ function openReceiptModal() {
       </div>
       <label class="field"><span>Сумма, ₽</span><input name="amount" data-amount inputmode="decimal" required placeholder="0,00" value="25000,00" /></label>
       <label class="field"><span>Дата</span><input name="date" type="date" required value="2026-08-13" /></label>
+      <label class="field full" id="receipt-issue-wrap">
+        <span>Выдача для списания остатка</span>
+        <select name="issueId" id="receipt-issue">
+          <option value="">Сначала выберите пользователя</option>
+        </select>
+        <p class="password-hint" id="receipt-issue-hint">Для возврата от пользователя укажите выдачу — остаток по ней уменьшится.</p>
+      </label>
       <label class="field full"><span>Назначение</span><input name="purpose" placeholder="Например, возврат остатка / финансирование" value="Поступление средств" /></label>
       <label class="field full"><span>Комментарий <em class="optional-mark">необязательно</em></span><input name="note" placeholder="Дополнительные сведения" /></label>
-      <p class="login-hint full" style="grid-column:1/-1">Поступление отражается у администратора и участвует в разделе «Движение денежных средств».</p>
+      <p class="login-hint full" style="grid-column:1/-1">Поступление отражается у администратора и участвует в разделе «Движение денежных средств». Возврат от пользователя уменьшает остаток выбранной выдачи.</p>
     </form>
     <div class="modal-actions">
       <button type="button" class="btn btn-secondary" data-close>Отмена</button>
@@ -1493,6 +1795,46 @@ function openReceiptModal() {
 
   bindAmountInputs(document.getElementById("receipt-form"));
   bindRecipientPicker(payers);
+
+  const issueWrap = document.getElementById("receipt-issue-wrap");
+  const issueSelect = document.getElementById("receipt-issue");
+  const issueHint = document.getElementById("receipt-issue-hint");
+  const purposeInput = document.querySelector('#receipt-form [name="purpose"]');
+
+  const syncIssueField = () => {
+    const key = document.getElementById("recipient-key")?.value || "";
+    const selected = payers.find((r) => r.key === key);
+    if (!selected || selected.type !== "user") {
+      issueWrap.classList.add("hidden");
+      issueSelect.innerHTML = `<option value="">—</option>`;
+      issueSelect.required = false;
+      issueSelect.value = "";
+      return;
+    }
+    issueWrap.classList.remove("hidden");
+    syncIssueBalancesForUser(selected.id);
+    const issues = activeIssuesForUser(selected.id, { withRestOnly: true });
+    if (!issues.length) {
+      issueSelect.innerHTML = `<option value="">Нет выдач с остатком</option>`;
+      issueSelect.required = true;
+      issueHint.textContent = "У пользователя нет активных выдач с остатком — возврат зафиксировать нельзя.";
+      return;
+    }
+    issueSelect.innerHTML =
+      `<option value="" disabled selected>Выберите выдачу</option>` +
+      issues.map((i) => `<option value="${i.id}">${escapeHtml(issueOptionLabel(i))}</option>`).join("");
+    issueSelect.required = true;
+    issueHint.textContent = "Сумма возврата не может превышать остаток по выбранной выдаче.";
+    if (purposeInput && (!purposeInput.value || purposeInput.value === "Поступление средств")) {
+      purposeInput.value = "Возврат неиспользованных средств";
+    }
+  };
+
+  const keyInput = document.getElementById("recipient-key");
+  keyInput.addEventListener("change", syncIssueField);
+  document.getElementById("recipient-list")?.addEventListener("mousedown", () => setTimeout(syncIssueField, 0));
+  document.getElementById("recipient-search")?.addEventListener("blur", () => setTimeout(syncIssueField, 150));
+  syncIssueField();
 
   document.getElementById("receipt-form").addEventListener("submit", (e) => {
     e.preventDefault();
@@ -1508,6 +1850,24 @@ function openReceiptModal() {
       showAlert("Выберите плательщика из списка.", "Плательщик не выбран");
       return;
     }
+
+    let issueId = null;
+    if (selected.type === "user") {
+      issueId = Number(fd.get("issueId") || 0);
+      if (!issueId) {
+        showAlert("Для возврата от пользователя выберите выдачу, с которой списывается остаток.", "Выдача не выбрана");
+        return;
+      }
+      const available = issueAvailableRest(issueId);
+      if (amount > available + 0.001) {
+        showAlert(
+          `Сумма возврата превышает остаток по выдаче № ${issueId}.\nДоступно: ${money(available)}.`,
+          "Превышение остатка"
+        );
+        return;
+      }
+    }
+
     const row = {
       id: 200 + state.receipts.length + 1,
       payerType: selected.type,
@@ -1518,14 +1878,18 @@ function openReceiptModal() {
       purpose: String(fd.get("purpose") || "").trim(),
       note: String(fd.get("note") || "").trim(),
       status: "Активна",
+      issueId,
       createdByName: currentActor().actorName,
     };
     state.receipts.unshift(row);
+    if (issueId) syncIssueBalancesForUser(selected.id);
     logActivity({
       action: "create",
       entity: "receipt",
       entityLabel: `Поступление № ${row.id}`,
-      detail: `Поступление ${money(amount)} от ${row.payerName} (${receiptPayerKind(row)})`,
+      detail: issueId
+        ? `Возврат ${money(amount)} от ${row.payerName} по выдаче № ${issueId}`
+        : `Поступление ${money(amount)} от ${row.payerName} (${receiptPayerKind(row)})`,
     });
     closeModal();
     renderReceipts();
@@ -1583,10 +1947,6 @@ function renderCashflow() {
   const defaultTo = "2026-08-13";
 
   els.content.innerHTML = `
-    <p class="section-note" style="margin-top:0">
-      Реестр операций за период: когда поступило и когда выдано, кому/от кого и кем зафиксировано.
-      Сравнение прихода и расхода — в колонках «Поступление / Выдача», итогах и накопительном сальдо. Это не ОСВ из 1С.
-    </p>
     <div class="filters-bar">
       <label class="filter-date"><span>Период с</span><input type="date" id="cf-from" class="filter-select" value="${defaultFrom}" /></label>
       <label class="filter-date"><span>по</span><input type="date" id="cf-to" class="filter-select" value="${defaultTo}" /></label>
@@ -1758,23 +2118,24 @@ function renderUsers() {
   `;
   document.getElementById("btn-new-user").addEventListener("click", () => openUserModal());
   document.getElementById("btn-logout-all").addEventListener("click", async () => {
-    const active = state.users.filter((u) => u.status === "Активен").length;
+    const others = state.users.filter((u) => u.id !== state.userId && u.status === "Активен");
     const ok = await showConfirm(
-      `Завершить все активные сессии пользователей (${active})?\n\n` +
-        "Это принудительный выход всех, кто сейчас в системе.\n" +
+      `Завершить все активные сессии других пользователей (${others.length})?\n\n` +
+        "Это принудительный выход всех, кто сейчас в системе (кроме вас).\n" +
         "Пароли не меняются — войти снова можно теми же учётными данными.\n" +
         "Учётные записи не блокируются, данные не удаляются.",
       "Подтвердите действие"
     );
     if (!ok) return;
+    others.forEach((u) => bumpSession(u));
     logActivity({
       action: "kick",
       entity: "session",
       entityLabel: "Все пользователи",
-      detail: `Принудительный выход всех активных сессий (${active})`,
+      detail: `Принудительный выход всех активных сессий (${others.length}), кроме текущего администратора`,
     });
     await showAlert(
-      `Принудительный выход выполнен для ${active} активных пользователей (прототип).`,
+      `Принудительный выход выполнен для ${others.length} пользователей.\nПри следующем действии они будут возвращены на экран входа.`,
       "Сессии завершены"
     );
   });
@@ -1846,33 +2207,68 @@ function bindUserActions() {
         entityLabel: fullName(u),
         detail: blocking ? "Учётная запись заблокирована" : "Учётная запись разблокирована",
       });
+      if (blocking) {
+        invalidateUserSession(u, {
+          message: "Учётная запись заблокирована администратором.",
+        });
+        if (!state.role) return;
+      }
       renderUsers();
     });
-    tr.querySelector('[data-act="reset"]')?.addEventListener("click", () => {
+    tr.querySelector('[data-act="reset"]')?.addEventListener("click", async () => {
       const u = user();
+      const ok = await showConfirm(
+        `Сбросить пароль для «${fullName(u)}»?\n\n` +
+          "Старый пароль перестанет работать.\n" +
+          "Активная сессия пользователя будет завершена.\n" +
+          "Отчёты и данные сохранятся. Новый временный пароль нужно передать пользователю лично.",
+        "Сброс пароля"
+      );
+      if (!ok) return;
       const temp = generateTempPassword();
       u.password = temp;
       u.mustResetPassword = false;
+      bumpSession(u);
+      const kickedSelf = state.userId === u.id;
+      if (kickedSelf) {
+        state.sessionEpoch = u.sessionEpoch;
+      }
       logActivity({
         action: "reset_password",
         entity: "user",
         entityLabel: fullName(u),
-        detail: "Пароль пользователя сброшен, выдан временный",
+        detail: "Пароль пользователя сброшен, выдан временный. Сессия пользователя завершена.",
       });
       showAlert(
-        `Пароль для «${fullName(u)}» сброшен.\nВременный пароль: ${temp}\nОтчёты и данные пользователя сохранены.`,
+        `Пароль для «${fullName(u)}» сброшен.\nВременный пароль: ${temp}\nОтчёты и данные сохранены.\nАктивная сессия пользователя завершена — передайте новый пароль лично.`,
         "Пароль сброшен"
       );
     });
-    tr.querySelector('[data-act="kick"]')?.addEventListener("click", () => {
+    tr.querySelector('[data-act="kick"]')?.addEventListener("click", async () => {
       const u = user();
+      if (u.id === state.userId) {
+        showAlert("Нельзя завершить собственную сессию этой кнопкой. Используйте «Выйти».", "Сессия");
+        return;
+      }
+      const ok = await showConfirm(
+        `Принудительно завершить сессию «${fullName(u)}»?\n\n` +
+          "Пользователь будет выброшен из системы при следующем действии.\n" +
+          "Пароль не меняется — войти снова можно теми же учётными данными.\n" +
+          "Данные и отчёты не удаляются.",
+        "Принудительный выход"
+      );
+      if (!ok) return;
+      bumpSession(u);
       logActivity({
         action: "kick",
         entity: "session",
         entityLabel: fullName(u),
         detail: "Принудительный выход пользователя",
       });
-      showAlert(`Выполнен принудительный выход для «${fullName(u)}» (прототип).`, "Выход выполнен");
+      showAlert(
+        `Сессия «${fullName(u)}» завершена.\nПри следующем действии пользователь вернётся на экран входа.`,
+        "Выход выполнен"
+      );
     });
     tr.querySelector('[data-act="edit"]')?.addEventListener("click", () => {
       openUserModal(user());
@@ -1888,6 +2284,12 @@ function bindUserActions() {
         entityLabel: fullName(u),
         detail: `Роль изменена: ${prev} → ${u.role}`,
       });
+      if (u.id === state.userId) {
+        state.role = u.role === "Администратор" ? "admin" : "user";
+        els.userRole.textContent = u.role;
+        renderNav();
+        render();
+      }
     });
   });
 }
@@ -2021,6 +2423,7 @@ function openUserModal(existing) {
         ...payload,
         password,
         mustResetPassword: false,
+        sessionEpoch: 0,
         status: "Активен",
         created: "2026-08-12",
       };
@@ -2118,8 +2521,8 @@ function renderDictsBoard() {
 function dictPrimaryCell(key, row) {
   if (key === "procedures") {
     return `<div class="dict-primary">
-      <div class="dict-name">${row.name}</div>
-      <div class="dict-sub">Должник: ${row.debtor || "—"}</div>
+      <div class="dict-name">${row.debtor || "—"}</div>
+      <div class="dict-sub">${row.name}</div>
     </div>`;
   }
   return `<div class="dict-primary"><div class="dict-name">${row.name}</div></div>`;
@@ -2235,7 +2638,7 @@ function renderDictList(key) {
       <table class="users-table dict-table">
         <thead>
           <tr>
-            <th>${key === "procedures" ? "Процедура" : "Название"}</th>
+            <th>${key === "procedures" ? "Должник" : "Название"}</th>
             <th>Статус</th>
             <th class="th-actions">Действия</th>
           </tr>
@@ -2454,12 +2857,97 @@ function isUserIncomeActive(row) {
   return !String(row?.status || "Активна").startsWith("Архив");
 }
 
+/** Типы бизнес-приходов, которые пользователь принял от имени компании */
+const USER_INCOME_TYPES = {
+  counterparty: {
+    id: "counterparty",
+    label: "Оплата от контрагента",
+    hint: "Клиент или контрагент передал деньги вам, а это средства компании.",
+    purposeLabel: "Основание / за что",
+    purposePlaceholder: "Например, оплата услуг",
+    fromRequired: true,
+    procedureRequired: false,
+  },
+  procedure: {
+    id: "procedure",
+    label: "Поступление по процедуре",
+    hint: "Деньги приняты в рамках дела или процедуры банкротства.",
+    purposeLabel: "Основание",
+    purposePlaceholder: "Например, возврат / поступление по делу",
+    fromRequired: false,
+    procedureRequired: true,
+  },
+  asset_sale: {
+    id: "asset_sale",
+    label: "Продажа имущества компании",
+    hint: "Выручка от продажи имущества или ТМЦ компании, не личных вещей.",
+    purposeLabel: "Что продано",
+    purposePlaceholder: "Например, ноутбук и монитор",
+    fromRequired: false,
+    procedureRequired: false,
+  },
+  other: {
+    id: "other",
+    label: "Иное бизнес-поступление",
+    hint: "Другой приход денег компании через вас. Личные доходы сюда не относятся.",
+    purposeLabel: "Описание основания",
+    purposePlaceholder: "Кратко опишите бизнес-основание",
+    fromRequired: false,
+    procedureRequired: false,
+  },
+};
+
+function normalizeUserIncome(row) {
+  if (!row || typeof row !== "object") return row;
+  if (!row.type) {
+    if (String(row.purpose || "").toLowerCase().includes("продаж")) row.type = "asset_sale";
+    else if (row.incomeKind === "targeted" || row.procedure) row.type = "procedure";
+    else if (row.source === "Административный") row.type = "other";
+    else row.type = "other";
+  }
+  if (!USER_INCOME_TYPES[row.type]) row.type = "other";
+  row.company = row.company || "";
+  row.fromName = row.fromName || "";
+  row.procedure = row.procedure || "";
+  row.purpose = row.purpose || row.purposeDetail || "";
+  row.note = row.note || "";
+  return row;
+}
+
+function incomeTypeMeta(typeOrRow) {
+  const type = typeof typeOrRow === "string" ? typeOrRow : normalizeUserIncome(typeOrRow)?.type;
+  return USER_INCOME_TYPES[type] || USER_INCOME_TYPES.other;
+}
+
+function incomeTypeLabel(typeOrRow) {
+  return incomeTypeMeta(typeOrRow).label;
+}
+
 function myIncomes(list = state.userIncomes) {
-  return list.filter((r) => r.userId === currentUserId());
+  return list.filter((r) => r.userId === currentUserId()).map(normalizeUserIncome);
 }
 
 function myActiveIncomes() {
   return myIncomes().filter(isUserIncomeActive);
+}
+
+function currentMonthPrefix(date = new Date()) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  return `${y}-${m}`;
+}
+
+function isInCurrentMonth(isoDate, date = new Date()) {
+  return String(isoDate || "").startsWith(currentMonthPrefix(date));
+}
+
+function myActiveIncomesThisMonth() {
+  return myActiveIncomes().filter((r) => isInCurrentMonth(r.date));
+}
+
+function formatMonthLabel(date = new Date()) {
+  const label = date.toLocaleDateString("ru-RU", { month: "long", year: "numeric" });
+  return label.charAt(0).toUpperCase() + label.slice(1);
 }
 
 function userIncomeRows(rows) {
@@ -2468,14 +2956,24 @@ function userIncomeRows(rows) {
 
   return rows
     .map((r) => {
-      const archived = !isUserIncomeActive(r);
-      return `<tr class="${archived ? "is-archived" : ""}" data-income-id="${r.id}">
-        <td>${r.id}</td>
-        <td>${formatDate(r.date)}</td>
-        <td>${r.source || "—"}</td>
-        <td>${r.purpose || "—"}</td>
-        <td class="money">${money(r.amount)}</td>
-        <td>${r.note || "—"}</td>
+      const row = normalizeUserIncome(r);
+      const archived = !isUserIncomeActive(row);
+      const sub = [row.fromName ? `от: ${row.fromName}` : "", row.procedure ? `процедура: ${row.procedure}` : ""]
+        .filter(Boolean)
+        .join(" · ");
+      return `<tr class="${archived ? "is-archived" : ""}" data-income-id="${row.id}">
+        <td>${row.id}</td>
+        <td>${formatDate(row.date)}</td>
+        <td>${escapeHtml(incomeTypeLabel(row))}</td>
+        <td>${escapeHtml(row.company || "—")}</td>
+        <td>
+          <div class="dict-primary">
+            <div class="dict-name">${escapeHtml(row.purpose || "—")}</div>
+            ${sub ? `<div class="dict-sub">${escapeHtml(sub)}</div>` : ""}
+          </div>
+        </td>
+        <td class="money">${money(row.amount)}</td>
+        <td>${escapeHtml(row.note || "—")}</td>
         <td>${badge(archived ? "Архив" : "Активна")}</td>
         <td>
           <div class="dict-actions">
@@ -2496,125 +2994,86 @@ function bindUserIncomeArchiveActions() {
       const archived = !isUserIncomeActive(row);
       const ok = await showConfirm(
         archived
-          ? `Вернуть доход № ${row.id} в список активных?`
-          : `Архивировать доход № ${row.id}?\n\nЗапись останется в истории, но не будет в активной сумме. Удаление не выполняется.`,
-        archived ? "Вернуть из архива" : "Архивировать доход"
+          ? `Вернуть приход № ${row.id} в список активных?`
+          : `Архивировать приход № ${row.id}?\n\nЗапись останется в истории. Удаление не выполняется.`,
+        archived ? "Вернуть из архива" : "Архивировать приход"
       );
       if (!ok) return;
       row.status = archived ? "Активна" : "Архив";
       logActivity({
         action: archived ? "restore" : "archive",
         entity: "income",
-        entityLabel: `Доход № ${row.id}`,
+        entityLabel: `Приход № ${row.id}`,
         detail: archived
-          ? `Доход возвращён (${money(row.amount)}): ${row.purpose || row.source}`
-          : `Доход архивирован (${money(row.amount)}): ${row.purpose || row.source}`,
+          ? `Приход возвращён (${money(row.amount)}): ${incomeTypeLabel(row)} · ${row.purpose || row.company}`
+          : `Приход архивирован (${money(row.amount)}): ${incomeTypeLabel(row)} · ${row.purpose || row.company}`,
       });
-      renderMyIncome();
+      renderFunds();
     });
   });
 }
 
 function renderMyIncome() {
-  setTitle("Мой доход");
-  const total = myActiveIncomes().reduce((s, r) => s + Number(r.amount || 0), 0);
-  const sources = [...new Set(myIncomes().map((r) => r.source).filter(Boolean))].sort((a, b) =>
-    a.localeCompare(b, "ru")
-  );
-
-  els.content.innerHTML = `
-    <p class="section-note" style="margin-top:0">
-      Личные поступления: продажа, возврат покупателю, иной свой доход.
-      Это не выдача от администратора и не входит в «Движение ДС» администратора.
-    </p>
-    <div class="grid-3" style="margin-bottom:16px">
-      <div class="card soft stat"><div class="label">Активный доход</div><div class="value">${money(total)}</div><div class="hint">сумма без архивных записей</div></div>
-    </div>
-    <div class="filters-bar">
-      <div class="search-wrap filters-search">
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-        <input class="search" id="income-search" placeholder="Поиск по назначению или комментарию..." />
-      </div>
-      <label class="filter-date"><span>Период с</span><input type="date" id="income-filter-from" class="filter-select" value="" /></label>
-      <label class="filter-date"><span>по</span><input type="date" id="income-filter-to" class="filter-select" value="" /></label>
-      <select id="income-filter-source" class="filter-select" title="Источник">
-        <option value="all" selected>Все источники</option>
-        ${sources.map((s) => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join("")}
-      </select>
-      <div class="filters-actions">
-        <button type="button" class="btn btn-secondary btn-sm filters-reset" id="income-clear-filters">Снять все фильтры</button>
-        <button type="button" class="btn btn-primary btn-sm" id="btn-new-income">Записать доход</button>
-      </div>
-    </div>
-    <div class="table-wrap">
-      <table class="data">
-        <thead>
-          <tr>
-            <th>№</th><th>Дата</th><th>Источник</th><th>Назначение</th><th>Сумма</th><th>Комментарий</th><th>Статус</th><th></th>
-          </tr>
-        </thead>
-        <tbody id="income-body"></tbody>
-      </table>
-    </div>
-  `;
-
-  const paint = () => {
-    const q = document.getElementById("income-search").value.toLowerCase().trim();
-    const from = document.getElementById("income-filter-from").value;
-    const to = document.getElementById("income-filter-to").value;
-    const source = document.getElementById("income-filter-source").value;
-
-    let list = myIncomes();
-    if (from) list = list.filter((r) => r.date >= from);
-    if (to) list = list.filter((r) => r.date <= to);
-    if (source !== "all") list = list.filter((r) => r.source === source);
-    if (q) {
-      list = list.filter(
-        (r) =>
-          String(r.purpose || "").toLowerCase().includes(q) ||
-          String(r.note || "").toLowerCase().includes(q)
-      );
-    }
-
-    document.getElementById("income-body").innerHTML = list.length
-      ? userIncomeRows(list)
-      : `<tr><td colspan="8" class="empty">${
-          myIncomes().length ? "Ничего не найдено по выбранным условиям" : "Доходов пока нет — запишите первую продажу или иной приход"
-        }</td></tr>`;
-    bindUserIncomeArchiveActions();
-  };
-
-  document.getElementById("income-search").addEventListener("input", paint);
-  ["income-filter-from", "income-filter-to", "income-filter-source"].forEach((id) => {
-    document.getElementById(id).addEventListener("change", paint);
-  });
-  document.getElementById("income-clear-filters").addEventListener("click", () => {
-    document.getElementById("income-search").value = "";
-    document.getElementById("income-filter-from").value = "";
-    document.getElementById("income-filter-to").value = "";
-    document.getElementById("income-filter-source").value = "all";
-    paint();
-  });
-  document.getElementById("btn-new-income").addEventListener("click", openMyIncomeModal);
-  paint();
+  // legacy: доход объединён с «Мои средства»
+  state.page = "funds";
+  renderNav();
+  renderFunds();
 }
 
 function openMyIncomeModal() {
+  const companies = state.dicts.companies.filter((c) => c.status === "Активна");
+  const procedures = state.dicts.procedures.filter((p) => p.status === "Активна");
+  const today = new Date().toISOString().slice(0, 10);
+  const typeButtons = Object.values(USER_INCOME_TYPES)
+    .map(
+      (t, idx) =>
+        `<button type="button" class="password-mode-btn${idx === 0 ? " is-active" : ""}" data-income-type="${t.id}">${escapeHtml(t.label)}</button>`
+    )
+    .join("");
+
   showModal(`
-    <h3>Записать доход</h3>
+    <h3>Зарегистрировать приход</h3>
+    <p class="section-note" style="margin-top:0">
+      Фиксируйте только деньги <strong>бизнеса</strong>, которые вы приняли.
+      Личные доходы, зарплата и премии здесь не учитываются.
+    </p>
     <form id="income-form" class="form-grid">
+      <div class="field full">
+        <span>Тип прихода</span>
+        <div class="password-mode issue-kind-mode income-type-mode" role="group" aria-label="Тип прихода">
+          ${typeButtons}
+        </div>
+        <input type="hidden" name="type" id="income-type" value="counterparty" />
+        <p class="password-hint" id="income-type-hint">${escapeHtml(USER_INCOME_TYPES.counterparty.hint)}</p>
+      </div>
       <label class="field"><span>Сумма, ₽</span><input name="amount" data-amount inputmode="decimal" required placeholder="0,00" value="" /></label>
-      <label class="field"><span>Дата</span><input name="date" type="date" required value="2026-08-13" /></label>
-      <label class="field full"><span>Источник</span>
-        <select name="source" required>
-          <option value="Продажа" selected>Продажа</option>
-          <option value="Услуга">Услуга</option>
-          <option value="Возврат">Возврат</option>
-          <option value="Иное">Иное</option>
+      <label class="field"><span>Дата</span><input name="date" type="date" required value="${today}" /></label>
+      <label class="field full">
+        <span>Компания</span>
+        <select name="company" id="income-company" required>
+          <option value="" disabled selected>Выберите компанию</option>
+          ${companies.map((c) => `<option value="${escapeHtml(c.name)}">${escapeHtml(c.name)}</option>`).join("")}
         </select>
       </label>
-      <label class="field full"><span>Назначение / описание</span><input name="purpose" required placeholder="Например, продажа ноутбука" value="" /></label>
-      <label class="field full"><span>Комментарий <em class="optional-mark">необязательно</em></span><input name="note" placeholder="Дополнительные сведения" /></label>
+      <label class="field full" id="income-from-wrap">
+        <span>От кого</span>
+        <input name="fromName" id="income-from" placeholder="Контрагент или плательщик" />
+      </label>
+      <label class="field full" id="income-procedure-wrap">
+        <span id="income-procedure-label">Процедура <em class="optional-mark">необязательно</em></span>
+        <select name="procedure" id="income-procedure">
+          <option value="">Не указано</option>
+          ${procedures.map((p) => `<option value="${escapeHtml(p.name)}">${escapeHtml(p.name)}${p.debtor ? ` · ${escapeHtml(p.debtor)}` : ""}</option>`).join("")}
+        </select>
+      </label>
+      <label class="field full" id="income-purpose-wrap">
+        <span id="income-purpose-label">Основание / за что</span>
+        <input name="purpose" id="income-purpose" required placeholder="Например, оплата услуг" />
+      </label>
+      <label class="field full">
+        <span>Комментарий <em class="optional-mark">необязательно</em></span>
+        <input name="note" placeholder="Дополнительные сведения" />
+      </label>
     </form>
     <div class="modal-actions">
       <button type="button" class="btn btn-secondary" data-close>Отмена</button>
@@ -2624,6 +3083,42 @@ function openMyIncomeModal() {
 
   bindAmountInputs(document.getElementById("income-form"));
 
+  const typeInput = document.getElementById("income-type");
+  const typeHint = document.getElementById("income-type-hint");
+  const fromWrap = document.getElementById("income-from-wrap");
+  const fromInput = document.getElementById("income-from");
+  const procedureWrap = document.getElementById("income-procedure-wrap");
+  const procedureLabel = document.getElementById("income-procedure-label");
+  const procedureSelect = document.getElementById("income-procedure");
+  const purposeLabel = document.getElementById("income-purpose-label");
+  const purposeInput = document.getElementById("income-purpose");
+
+  const syncTypeUi = (type) => {
+    const meta = incomeTypeMeta(type);
+    typeInput.value = meta.id;
+    typeHint.textContent = meta.hint;
+    document.querySelectorAll("[data-income-type]").forEach((btn) => {
+      btn.classList.toggle("is-active", btn.dataset.incomeType === meta.id);
+    });
+
+    fromWrap.classList.toggle("hidden", meta.id === "asset_sale");
+    fromInput.required = meta.fromRequired;
+
+    procedureSelect.required = meta.procedureRequired;
+    procedureLabel.innerHTML = meta.procedureRequired
+      ? "Процедура"
+      : `Процедура <em class="optional-mark">необязательно</em>`;
+    procedureWrap.classList.toggle("hidden", meta.id === "asset_sale");
+
+    purposeLabel.textContent = meta.purposeLabel;
+    purposeInput.placeholder = meta.purposePlaceholder;
+  };
+
+  document.querySelectorAll("[data-income-type]").forEach((btn) => {
+    btn.addEventListener("click", () => syncTypeUi(btn.dataset.incomeType));
+  });
+  syncTypeUi("counterparty");
+
   document.getElementById("income-form").addEventListener("submit", (e) => {
     e.preventDefault();
     const fd = new FormData(e.target);
@@ -2632,80 +3127,453 @@ function openMyIncomeModal() {
       showAlert("Укажите сумму с двумя знаками после запятой, например 35 000,00", "Проверьте сумму");
       return;
     }
+
+    const type = String(fd.get("type") || "other");
+    const meta = incomeTypeMeta(type);
+    const company = String(fd.get("company") || "").trim();
+    const fromName = String(fd.get("fromName") || "").trim();
+    const procedure = String(fd.get("procedure") || "").trim();
     const purpose = String(fd.get("purpose") || "").trim();
-    if (!purpose) {
-      showAlert("Укажите назначение или описание дохода.", "Проверьте данные");
+    const note = String(fd.get("note") || "").trim();
+
+    if (!company) {
+      showAlert("Укажите компанию — приход должен относиться к бизнесу.", "Проверьте данные");
       return;
     }
-    const row = {
-      id: 300 + state.userIncomes.length + 1,
+    if (meta.fromRequired && !fromName) {
+      showAlert("Укажите, от кого приняты деньги.", "Проверьте данные");
+      return;
+    }
+    if (meta.procedureRequired && !procedure) {
+      showAlert("Для поступления по процедуре выберите процедуру.", "Проверьте данные");
+      return;
+    }
+    if (!purpose) {
+      showAlert(`Заполните поле «${meta.purposeLabel}».`, "Проверьте данные");
+      return;
+    }
+
+    const nextId = state.userIncomes.reduce((m, r) => Math.max(m, Number(r.id) || 0), 300) + 1;
+    const row = normalizeUserIncome({
+      id: nextId,
       userId: currentUserId(),
       amount,
       date: String(fd.get("date")),
-      source: String(fd.get("source") || "Иное"),
+      type: meta.id,
+      company,
+      fromName,
       purpose,
-      note: String(fd.get("note") || "").trim(),
+      procedure: meta.id === "asset_sale" ? "" : procedure,
+      note,
       status: "Активна",
-    };
+    });
     state.userIncomes.unshift(row);
     logActivity({
       action: "create",
       entity: "income",
-      entityLabel: `Доход № ${row.id}`,
-      detail: `${row.source}: ${row.purpose} · ${money(row.amount)}`,
+      entityLabel: `Приход № ${row.id}`,
+      detail: `${incomeTypeLabel(row)} · ${row.company}${row.fromName ? ` · от ${row.fromName}` : ""} · ${row.purpose} · ${money(row.amount)}`,
     });
     closeModal();
-    state.page = "my-income";
+    state.page = "funds";
     renderNav();
     render();
   });
 }
 
-function renderFunds() {
-  setTitle("Мои средства");
-  syncIssueBalancesForUser(currentUserId());
-  const funds = userFundSummary(currentUserId());
-  const myIssues = activeIssues().filter((i) => i.userId === currentUserId());
-  const incomeTotal = myActiveIncomes().reduce((s, r) => s + Number(r.amount || 0), 0);
+function paintFundsIncomeTable() {
+  const searchEl = document.getElementById("income-search");
+  const fromEl = document.getElementById("income-filter-from");
+  const toEl = document.getElementById("income-filter-to");
+  const typeEl = document.getElementById("income-filter-type");
+  const body = document.getElementById("income-body");
+  if (!searchEl || !fromEl || !toEl || !typeEl || !body) return;
 
-  els.content.innerHTML = `
-    <div class="grid-3">
-      <div class="card stat"><div class="label">Получено</div><div class="value">${money(funds.issued)}</div></div>
-      <div class="card stat"><div class="label">В отчётах</div><div class="value">${money(funds.allocated)}</div></div>
-      <div class="card soft stat"><div class="label">Доступный остаток</div><div class="value">${money(funds.rest)}</div></div>
+  const q = searchEl.value.toLowerCase().trim();
+  const from = fromEl.value;
+  const to = toEl.value;
+  const type = typeEl.value;
+
+  let list = myIncomes();
+  if (from) list = list.filter((r) => r.date >= from);
+  if (to) list = list.filter((r) => r.date <= to);
+  if (type !== "all") list = list.filter((r) => r.type === type);
+  if (q) {
+    list = list.filter(
+      (r) =>
+        String(r.purpose || "").toLowerCase().includes(q) ||
+        String(r.note || "").toLowerCase().includes(q) ||
+        String(r.company || "").toLowerCase().includes(q) ||
+        String(r.fromName || "").toLowerCase().includes(q) ||
+        String(r.procedure || "").toLowerCase().includes(q) ||
+        incomeTypeLabel(r).toLowerCase().includes(q)
+    );
+  }
+
+  body.innerHTML = list.length
+    ? userIncomeRows(list)
+    : `<tr><td colspan="9" class="empty">${
+        myIncomes().length
+          ? "Ничего не найдено по выбранным условиям"
+          : "Приходов пока нет — зарегистрируйте первое поступление денег бизнеса"
+      }</td></tr>`;
+  bindUserIncomeArchiveActions();
+}
+
+function fundsIssuePurpose(issue) {
+  return String(issue?.purpose || issue?.note || "").trim();
+}
+
+function fundsIssueCardHtml(f) {
+  const archived = !isIssueActive(f);
+  const rest = Number(f.rest || 0);
+  const canArchive = !archived && rest <= 0.001;
+  const canReturn = !archived && rest > 0.001;
+  const label = fundsIssuePurpose(f) || "Поступление от администратора";
+  return `<div class="list-card${archived ? " list-card-archived" : ""}" data-issue-id="${f.id}">
+    <div>
+      <h4>Поступление № ${f.id}${archived ? ` ${badge("Архив")}` : ""}</h4>
+      <p>${f.date} · ${escapeHtml(label)}</p>
+      <p style="margin-top:6px">Использовано ${money(f.used)} из ${money(f.amount)}</p>
+      <div class="progress"><span style="width:${f.amount ? Math.round((f.used / f.amount) * 100) : 0}%"></span></div>
     </div>
-    <p class="section-note">Доступный остаток = Получено − В отчётах. В отчётах учитываются статусы «На проверке», «На доработке» и «Утверждён». Черновики остаток не уменьшают. Личный доход учитывается отдельно в разделе «Мой доход» (${money(incomeTotal)}).</p>
-    <div class="section">
-      <div class="section-head"><h3><span class="icon">${icons.cash}</span> Выдачи</h3></div>
-      <div class="list-cards">
+    <div class="list-card-side">
+      <div class="money">${money(f.rest)}</div>
+      <div class="funds-card-actions">
         ${
-          myIssues.length
-            ? myIssues
-                .map(
-                  (f) => `<div class="list-card">
-            <div>
-              <h4>Выдача № ${f.id}</h4>
-              <p>${f.date} · ${f.note || f.purpose || "Выдача от администратора"}</p>
-              <p style="margin-top:6px">Использовано ${money(f.used)} из ${money(f.amount)}</p>
-              <div class="progress"><span style="width:${f.amount ? Math.round((f.used / f.amount) * 100) : 0}%"></span></div>
-            </div>
-            <div class="money">${money(f.rest)}</div>
-          </div>`
-                )
-                .join("")
-            : `<div class="empty card">Выдач пока нет</div>`
+          canReturn
+            ? `<button type="button" class="btn btn-secondary btn-sm" data-act="return-issue" title="Вернуть остаток администратору">Вернуть остаток</button>`
+            : ""
+        }
+        ${
+          canArchive
+            ? `<button type="button" class="btn btn-secondary btn-sm" data-act="archive-user-issue" title="Архивировать полностью использованное поступление">В архив</button>`
+            : ""
         }
       </div>
     </div>
+  </div>`;
+}
+
+function openReturnFundsModal(issueId) {
+  const issue = state.issues.find((x) => x.id === Number(issueId));
+  if (!issue || issue.userId !== currentUserId() || !isIssueActive(issue)) return;
+  syncIssueBalancesForUser(currentUserId());
+  const available = issueAvailableRest(issue.id);
+  if (available <= 0.001) {
+    showAlert("По этой выдаче нет остатка для возврата.", "Возврат");
+    return;
+  }
+
+  showModal(`
+    <h3>Вернуть остаток</h3>
+    <p class="section-note" style="margin-top:0">
+      Возврат уменьшит остаток по выдаче № ${issue.id} и сразу появится у администратора как поступление.
+      Доступно: <strong>${money(available)}</strong>.
+    </p>
+    <form id="return-form" class="form-grid">
+      <label class="field"><span>Сумма возврата, ₽</span><input name="amount" data-amount inputmode="decimal" required placeholder="0,00" value="${formatAmount(available)}" /></label>
+      <label class="field"><span>Дата</span><input name="date" type="date" required value="${new Date().toISOString().slice(0, 10)}" /></label>
+      <label class="field full"><span>Комментарий <em class="optional-mark">необязательно</em></span><input name="note" placeholder="Например, неиспользованный остаток" /></label>
+    </form>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-secondary" data-close>Отмена</button>
+      <button type="submit" form="return-form" class="btn btn-primary">Вернуть</button>
+    </div>
+  `);
+
+  bindAmountInputs(document.getElementById("return-form"));
+  document.getElementById("return-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const amount = parseAmount(fd.get("amount"));
+    if (!Number.isFinite(amount) || amount <= 0) {
+      showAlert("Укажите сумму с двумя знаками после запятой.", "Проверьте сумму");
+      return;
+    }
+    const restNow = issueAvailableRest(issue.id);
+    if (amount > restNow + 0.001) {
+      showAlert(`Сумма превышает остаток. Доступно: ${money(restNow)}.`, "Превышение остатка");
+      return;
+    }
+    const me = currentUser();
+    const row = {
+      id: 200 + state.receipts.length + 1,
+      payerType: "user",
+      payerId: currentUserId(),
+      payerName: me ? fullName(me) : "Пользователь",
+      amount,
+      date: String(fd.get("date")),
+      purpose: "Возврат неиспользованных средств",
+      note: String(fd.get("note") || "").trim() || `Возврат остатка по выдаче № ${issue.id}`,
+      status: "Активна",
+      issueId: issue.id,
+      createdByName: currentActor().actorName,
+    };
+    state.receipts.unshift(row);
+    syncIssueBalancesForUser(currentUserId());
+    logActivity({
+      action: "return_funds",
+      entity: "receipt",
+      entityLabel: `Поступление № ${row.id}`,
+      detail: `Пользователь вернул ${money(amount)} по выдаче № ${issue.id}`,
+    });
+    closeModal();
+    renderFunds();
+  });
+}
+
+function bindFundsArchiveActions() {
+  document.querySelectorAll("[data-act='archive-user-issue']").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const id = Number(btn.closest("[data-issue-id]")?.dataset.issueId);
+      const issue = state.issues.find((x) => x.id === id);
+      if (!issue || issue.userId !== currentUserId()) return;
+      if (Number(issue.rest || 0) > 0.001) {
+        showAlert("В архив можно отправить только поступления с нулевым остатком.", "Архивирование");
+        return;
+      }
+      const ok = await showConfirm(
+        `Архивировать поступление № ${issue.id}?\n\nОно исчезнет из активного списка. История сохранится, удаление не выполняется.`,
+        "Архивировать поступление"
+      );
+      if (!ok) return;
+      issue.status = "Архив";
+      logActivity({
+        action: "archive",
+        entity: "issue",
+        entityLabel: `Поступление № ${issue.id}`,
+        detail: `Пользователь архивировал полностью использованное поступление (${money(issue.amount)})`,
+      });
+      syncIssueBalancesForUser(currentUserId());
+      renderFunds();
+    });
+  });
+  document.querySelectorAll("[data-act='return-issue']").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const id = Number(btn.closest("[data-issue-id]")?.dataset.issueId);
+      openReturnFundsModal(id);
+    });
+  });
+}
+
+function paintFundsReceiptsList() {
+  const searchEl = document.getElementById("receipts-search");
+  const fromEl = document.getElementById("receipts-filter-from");
+  const toEl = document.getElementById("receipts-filter-to");
+  const purposeEl = document.getElementById("receipts-filter-purpose");
+  const scopeEl = document.getElementById("receipts-filter-scope");
+  const amountFromEl = document.getElementById("receipts-filter-amount-from");
+  const amountToEl = document.getElementById("receipts-filter-amount-to");
+  const listEl = document.getElementById("receipts-list");
+  if (!searchEl || !fromEl || !toEl || !purposeEl || !scopeEl || !amountFromEl || !amountToEl || !listEl) return;
+
+  const uid = currentUserId();
+  const mine = state.issues.filter((i) => i.userId === uid);
+  const scope = scopeEl.value;
+  const pool =
+    scope === "archive" ? mine.filter((i) => !isIssueActive(i)) : mine.filter(isIssueActive);
+
+  const q = searchEl.value.trim().toLowerCase();
+  const from = fromEl.value;
+  const to = toEl.value;
+  const purpose = purposeEl.value;
+  const amountFrom = parseAmount(amountFromEl.value);
+  const amountTo = parseAmount(amountToEl.value);
+
+  let list = pool.slice();
+  if (from) list = list.filter((i) => i.date >= from);
+  if (to) list = list.filter((i) => i.date <= to);
+  if (purpose !== "all") list = list.filter((i) => fundsIssuePurpose(i) === purpose);
+  if (Number.isFinite(amountFrom)) list = list.filter((i) => Number(i.amount || 0) >= amountFrom);
+  if (Number.isFinite(amountTo)) list = list.filter((i) => Number(i.amount || 0) <= amountTo);
+  if (q) {
+    list = list.filter((i) => String(i.id).toLowerCase().includes(q));
+  }
+
+  listEl.innerHTML = list.length
+    ? list.map(fundsIssueCardHtml).join("")
+    : `<div class="empty card">${
+        pool.length
+          ? "Ничего не найдено по выбранным условиям"
+          : scope === "archive"
+            ? "В архиве пока нет поступлений"
+            : "Поступлений пока нет"
+      }</div>`;
+  bindFundsArchiveActions();
+}
+
+function renderFunds() {
+  setTitle("Мои средства");
+  syncIssueBalancesForUser(currentUserId());
+  const myIssues = activeIssues().filter((i) => i.userId === currentUserId());
+  const myIssuesAll = state.issues.filter((i) => i.userId === currentUserId());
+  const receiptsRest = myIssues.reduce((s, i) => s + Number(i.rest || 0), 0);
+  const purposes = [...new Set(myIssuesAll.map(fundsIssuePurpose).filter(Boolean))].sort((a, b) =>
+    a.localeCompare(b, "ru")
+  );
+  const incomeTypes = Object.values(USER_INCOME_TYPES);
+
+  els.content.innerHTML = `
+    <div class="funds-stack">
+      <section class="funds-block" id="funds-receipts-block">
+        <div class="section-head">
+          <button type="button" class="funds-collapse-toggle" id="funds-receipts-toggle" aria-expanded="true" aria-controls="funds-receipts-body">
+            <span class="icon">${icons.cash}</span>
+            <span class="funds-collapse-copy">
+              <strong>Поступления</strong>
+              <span class="funds-block-hint">Средства от администратора и остаток по каждой выдаче</span>
+            </span>
+          </button>
+          <div class="funds-block-aside">
+            <div class="funds-block-metric">
+              <span>Остаток</span>
+              <strong>${money(receiptsRest)}</strong>
+            </div>
+          </div>
+          <span class="funds-collapse-chevron" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+        </div>
+        <div class="funds-collapse-body" id="funds-receipts-body">
+          <div class="filters-bar">
+            <div class="search-wrap filters-search">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              <input class="search" id="receipts-search" placeholder="Поиск" inputmode="numeric" />
+            </div>
+            <label class="filter-date"><span>Период с</span><input type="date" id="receipts-filter-from" class="filter-select" value="" /></label>
+            <label class="filter-date"><span>по</span><input type="date" id="receipts-filter-to" class="filter-select" value="" /></label>
+            <select id="receipts-filter-purpose" class="filter-select" title="Назначение">
+              <option value="all" selected>Все назначения</option>
+              ${purposes.map((p) => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join("")}
+            </select>
+            <select id="receipts-filter-scope" class="filter-select" title="Статус">
+              <option value="active" selected>Активные</option>
+              <option value="archive">Архив</option>
+            </select>
+            <label class="filter-date filter-amount"><span>Сумма от</span><input type="text" id="receipts-filter-amount-from" class="filter-select" inputmode="decimal" placeholder="—" /></label>
+            <label class="filter-date filter-amount"><span>до</span><input type="text" id="receipts-filter-amount-to" class="filter-select" inputmode="decimal" placeholder="—" /></label>
+            <button type="button" class="btn btn-secondary btn-sm filters-reset" id="receipts-clear-filters">Снять все фильтры</button>
+          </div>
+          <div class="list-cards" id="receipts-list"></div>
+        </div>
+      </section>
+
+      <section class="funds-block" id="funds-income-block">
+        <div class="section-head">
+          <button type="button" class="funds-collapse-toggle" id="funds-income-toggle" aria-expanded="true" aria-controls="funds-income-body">
+            <span class="icon">${icons.inflow}</span>
+            <span class="funds-collapse-copy">
+              <strong>Принятые поступления</strong>
+              <span class="funds-block-hint">Деньги бизнеса, которые вы приняли. Личные доходы здесь не учитываются</span>
+            </span>
+          </button>
+          <div class="funds-block-aside">
+            <button type="button" class="btn btn-primary btn-sm" id="btn-new-income">Зарегистрировать приход</button>
+          </div>
+          <span class="funds-collapse-chevron" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+        </div>
+        <div class="funds-collapse-body" id="funds-income-body">
+          <div class="filters-bar">
+            <div class="search-wrap filters-search">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              <input class="search" id="income-search" placeholder="Поиск" />
+            </div>
+            <label class="filter-date"><span>Период с</span><input type="date" id="income-filter-from" class="filter-select" value="" /></label>
+            <label class="filter-date"><span>по</span><input type="date" id="income-filter-to" class="filter-select" value="" /></label>
+            <select id="income-filter-type" class="filter-select" title="Тип прихода">
+              <option value="all" selected>Все типы</option>
+              ${incomeTypes.map((t) => `<option value="${t.id}">${escapeHtml(t.label)}</option>`).join("")}
+            </select>
+            <button type="button" class="btn btn-secondary btn-sm filters-reset" id="income-clear-filters">Снять все фильтры</button>
+          </div>
+          <div class="table-wrap">
+            <table class="data">
+              <thead>
+                <tr>
+                  <th>№</th><th>Дата</th><th>Тип</th><th>Компания</th><th>Основание</th><th>Сумма</th><th>Комментарий</th><th>Статус</th><th></th>
+                </tr>
+              </thead>
+              <tbody id="income-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
   `;
+
+  document.getElementById("income-search").addEventListener("input", paintFundsIncomeTable);
+  ["income-filter-from", "income-filter-to", "income-filter-type"].forEach((id) => {
+    document.getElementById(id).addEventListener("change", paintFundsIncomeTable);
+  });
+  document.getElementById("income-clear-filters").addEventListener("click", () => {
+    document.getElementById("income-search").value = "";
+    document.getElementById("income-filter-from").value = "";
+    document.getElementById("income-filter-to").value = "";
+    document.getElementById("income-filter-type").value = "all";
+    paintFundsIncomeTable();
+  });
+  document.getElementById("btn-new-income").addEventListener("click", openMyIncomeModal);
+
+  document.getElementById("receipts-search").addEventListener("input", paintFundsReceiptsList);
+  ["receipts-filter-from", "receipts-filter-to", "receipts-filter-purpose", "receipts-filter-scope"].forEach((id) => {
+    document.getElementById(id).addEventListener("change", paintFundsReceiptsList);
+  });
+  ["receipts-filter-amount-from", "receipts-filter-amount-to"].forEach((id) => {
+    document.getElementById(id).addEventListener("input", paintFundsReceiptsList);
+  });
+  document.getElementById("receipts-clear-filters").addEventListener("click", () => {
+    document.getElementById("receipts-search").value = "";
+    document.getElementById("receipts-filter-from").value = "";
+    document.getElementById("receipts-filter-to").value = "";
+    document.getElementById("receipts-filter-purpose").value = "all";
+    document.getElementById("receipts-filter-scope").value = "active";
+    document.getElementById("receipts-filter-amount-from").value = "";
+    document.getElementById("receipts-filter-amount-to").value = "";
+    paintFundsReceiptsList();
+  });
+
+  const bindFundsCollapse = (blockId, toggleId, storageKey) => {
+    const block = document.getElementById(blockId);
+    const toggle = document.getElementById(toggleId);
+    const chevron = block?.querySelector(".funds-collapse-chevron");
+    const setCollapsed = (collapsed) => {
+      block?.classList.toggle("is-collapsed", collapsed);
+      toggle?.setAttribute("aria-expanded", collapsed ? "false" : "true");
+      try {
+        sessionStorage.setItem(storageKey, collapsed ? "1" : "0");
+      } catch {
+        /* ignore */
+      }
+    };
+    let saved = false;
+    try {
+      saved = sessionStorage.getItem(storageKey) === "1";
+    } catch {
+      saved = false;
+    }
+    setCollapsed(saved);
+    const onToggle = () => setCollapsed(!block.classList.contains("is-collapsed"));
+    toggle?.addEventListener("click", onToggle);
+    chevron?.addEventListener("click", onToggle);
+  };
+  bindFundsCollapse("funds-receipts-block", "funds-receipts-toggle", "funds-receipts-collapsed");
+  bindFundsCollapse("funds-income-block", "funds-income-toggle", "funds-income-collapsed");
+
+  paintFundsReceiptsList();
+  paintFundsIncomeTable();
 }
 
 function renderMyReports() {
-  setTitle("Мои отчёты");
+  setTitle("Создание отчётов");
   els.content.innerHTML = `
     <div class="workflow-hint card soft">
-      <strong>Как работать с отчётом:</strong>
-      сохраните черновик → отправьте администратору на проверку → при возврате исправьте замечания и отправьте снова.
+      <strong>Создание и отправка отчётов.</strong>
+      Сохраните черновик → отправьте администратору на проверку → при возврате исправьте замечания и отправьте снова.
+      С проверки можно отозвать отчёт обратно в черновик. Отклонённый отчёт не редактируется.
+      Готовые и отправленные отчёты также можно смотреть в разделе «Сводка отчётов».
     </div>
     <div class="toolbar">
       <input class="search" placeholder="Поиск по названию или компании" id="my-report-search" />
@@ -2729,6 +3597,139 @@ function renderMyReports() {
     bindMyReportCards();
   });
   bindMyReportCards();
+}
+
+function renderReportSummary() {
+  setTitle("Сводка отчётов");
+  const rows = myReports();
+  const companies = [...new Set(rows.map((r) => r.company).filter(Boolean))].sort((a, b) => a.localeCompare(b, "ru"));
+  const purposes = [...new Set(rows.map((r) => r.purpose).filter(Boolean))].sort((a, b) => a.localeCompare(b, "ru"));
+  const totalSum = rows.reduce((s, r) => s + Number(r.sum || 0), 0);
+  const inReview = rows.filter((r) => r.status === "На проверке").length;
+  const approved = rows.filter((r) => r.status === "Утверждён").length;
+
+  els.content.innerHTML = `
+    <p class="section-note" style="margin-top:0">
+      Просмотр ваших отчётов по периоду, статусу и назначению. Создать или отредактировать отчёт можно в разделе «Создание отчётов».
+    </p>
+    <div class="grid-3" style="margin-bottom:16px">
+      <div class="card soft stat"><div class="label">Всего сумма</div><div class="value">${money(totalSum)}</div><div class="hint">${rows.length} отчёт(ов)</div></div>
+      <div class="card stat"><div class="label">На проверке</div><div class="value">${inReview}</div></div>
+      <div class="card stat"><div class="label">Утверждено</div><div class="value">${approved}</div></div>
+    </div>
+    <div class="filters-bar">
+      <div class="search-wrap filters-search">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <input class="search" id="rs-search" placeholder="Поиск по №, названию или компании..." />
+      </div>
+      <label class="filter-date"><span>Период с</span><input type="date" id="rs-from" class="filter-select" value="" /></label>
+      <label class="filter-date"><span>по</span><input type="date" id="rs-to" class="filter-select" value="" /></label>
+      <select id="rs-status" class="filter-select" title="Статус">
+        <option value="all" selected>Все статусы</option>
+        <option value="Черновик">Черновик</option>
+        <option value="На проверке">На проверке</option>
+        <option value="На доработке">На доработке</option>
+        <option value="Утверждён">Утверждён</option>
+        <option value="Выплачено">Выплачено</option>
+        <option value="Отклонён">Отклонён</option>
+      </select>
+      <select id="rs-company" class="filter-select" title="Компания">
+        <option value="all" selected>Все компании</option>
+        ${companies.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("")}
+      </select>
+      <select id="rs-purpose" class="filter-select" title="Назначение">
+        <option value="all" selected>Все назначения</option>
+        ${purposes.map((p) => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join("")}
+      </select>
+      <div class="filters-actions">
+        <button type="button" class="btn btn-secondary btn-sm filters-reset" id="rs-clear">Снять все фильтры</button>
+        <button type="button" class="btn btn-primary btn-sm" id="rs-create" data-go="my-reports">К созданию</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table class="data">
+        <thead>
+          <tr>
+            <th>№</th>
+            <th>Дата</th>
+            <th>Название</th>
+            <th>Назначение</th>
+            <th>Компания</th>
+            <th>Процедура</th>
+            <th>Сумма</th>
+            <th>Статус</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="rs-body"></tbody>
+      </table>
+    </div>
+  `;
+
+  const paint = () => {
+    const q = document.getElementById("rs-search").value.toLowerCase().trim();
+    const from = document.getElementById("rs-from").value;
+    const to = document.getElementById("rs-to").value;
+    const status = document.getElementById("rs-status").value;
+    const company = document.getElementById("rs-company").value;
+    const purpose = document.getElementById("rs-purpose").value;
+
+    let list = myReports().slice();
+    if (from) list = list.filter((r) => r.date >= from);
+    if (to) list = list.filter((r) => r.date <= to);
+    if (status !== "all") list = list.filter((r) => r.status === status);
+    if (company !== "all") list = list.filter((r) => r.company === company);
+    if (purpose !== "all") list = list.filter((r) => r.purpose === purpose);
+    if (q) {
+      list = list.filter(
+        (r) =>
+          String(r.id).toLowerCase().includes(q) ||
+          String(r.title || "").toLowerCase().includes(q) ||
+          String(r.company || "").toLowerCase().includes(q) ||
+          String(r.purpose || "").toLowerCase().includes(q)
+      );
+    }
+
+    const sum = list.reduce((s, r) => s + Number(r.sum || 0), 0);
+    document.getElementById("rs-body").innerHTML = list.length
+      ? list
+          .map((r) => {
+            const actionLabel = canUserEdit(r) ? "Редактировать" : "Открыть";
+            return `<tr>
+              <td>${escapeHtml(r.id)}</td>
+              <td>${escapeHtml(r.date)}</td>
+              <td>${escapeHtml(r.title || "—")}</td>
+              <td>${escapeHtml(r.purpose || "—")}</td>
+              <td>${escapeHtml(r.company || "—")}</td>
+              <td>${escapeHtml(r.procedure || "—")}</td>
+              <td class="money">${money(r.sum)}</td>
+              <td>${badge(r.status)}</td>
+              <td><button type="button" class="btn btn-secondary btn-sm" data-open-report="${escapeHtml(r.id)}">${actionLabel}</button></td>
+            </tr>`;
+          })
+          .join("") +
+        `<tr class="rs-total"><td colspan="6"><strong>Итого по выборке</strong></td><td class="money"><strong>${money(sum)}</strong></td><td colspan="2"></td></tr>`
+      : `<tr><td colspan="9" class="empty">${
+          myReports().length ? "Ничего не найдено по выбранным условиям" : "Отчётов пока нет"
+        }</td></tr>`;
+    bindOpenReports();
+  };
+
+  document.getElementById("rs-search").addEventListener("input", paint);
+  ["rs-from", "rs-to", "rs-status", "rs-company", "rs-purpose"].forEach((id) => {
+    document.getElementById(id).addEventListener("change", paint);
+  });
+  document.getElementById("rs-clear").addEventListener("click", () => {
+    document.getElementById("rs-search").value = "";
+    document.getElementById("rs-from").value = "";
+    document.getElementById("rs-to").value = "";
+    document.getElementById("rs-status").value = "all";
+    document.getElementById("rs-company").value = "all";
+    document.getElementById("rs-purpose").value = "all";
+    paint();
+  });
+  bindGo();
+  paint();
 }
 
 function myReportCards(rows) {
@@ -3073,7 +4074,13 @@ function openReportEditor(existingId) {
     return openReportModal(existingId);
   }
 
+  syncIssueBalancesForUser(currentUserId());
   const title = existing ? "Редактирование отчёта" : "Новый отчёт";
+  const issueOptions = activeIssuesForUser(currentUserId(), {
+    withRestOnly: true,
+    includeIssueId: existing?.issueId || null,
+  });
+
   showModal(`
     <h3>${title}</h3>
     ${existing?.status === "На доработке" && existing.reviewComment
@@ -3098,34 +4105,68 @@ function openReportEditor(existingId) {
       </label>
       <label class="field"><span>Сумма, ₽</span><input name="sum" data-amount inputmode="decimal" required placeholder="0,00" value="${formatAmount(existing?.sum ?? 15000)}" /></label>
       <label class="field full"><span>Источник средств</span>
-        <select name="source">
-          <option ${!existing || existing.source?.includes("выдачи") ? "selected" : ""}>Из полученной выдачи</option>
-          <option ${existing?.source?.includes("Собственные") ? "selected" : ""}>Собственные средства (компенсация)</option>
+        <select name="source" id="report-source">
+          <option value="Из полученной выдачи" ${!existing || isIssueSource(existing.source) ? "selected" : ""}>Из полученной выдачи</option>
+          <option value="Собственные средства (компенсация)" ${existing && isCompensationSource(existing.source) ? "selected" : ""}>Собственные средства (компенсация)</option>
         </select>
+      </label>
+      <label class="field full" id="report-issue-wrap">
+        <span>Выдача</span>
+        <select name="issueId" id="report-issue">
+          ${
+            issueOptions.length
+              ? `<option value="" disabled ${existing?.issueId ? "" : "selected"}>Выберите выдачу</option>` +
+                issueOptions
+                  .map((i) => {
+                    const label = issueOptionLabel(i, { excludeReportId: existing?.id || null });
+                    return `<option value="${i.id}" ${Number(existing?.issueId) === i.id ? "selected" : ""}>${escapeHtml(label)}</option>`;
+                  })
+                  .join("")
+              : `<option value="">Нет выдач с доступным остатком</option>`
+          }
+        </select>
+        <p class="password-hint">Отчёт списывается с выбранной выдачи. Сумма не может превышать её остаток.</p>
       </label>
       ${receiptAttachMarkup(existing?.receipt)}
     </form>
-    <div class="modal-actions modal-actions-split">
+    <div class="modal-actions modal-actions-fill">
       <button type="button" class="btn btn-secondary" data-close>Отмена</button>
-      <div class="modal-actions-right">
-        <button type="button" class="btn btn-secondary" id="btn-save-draft">Сохранить черновик</button>
-        <button type="button" class="btn btn-primary" id="btn-submit-report">Отправить на проверку</button>
-      </div>
+      ${
+        existing?.status === "Черновик"
+          ? `<button type="button" class="btn btn-danger" id="btn-delete-draft">Удалить черновик</button>`
+          : ""
+      }
+      <button type="button" class="btn btn-secondary" id="btn-save-draft">Сохранить черновик</button>
+      <button type="button" class="btn btn-primary" id="btn-submit-report">Отправить на проверку</button>
     </div>
   `);
 
   bindAmountInputs(document.getElementById("report-form"));
   const receiptCtl = bindReceiptAttach({ initial: existing?.receipt || null });
+  const sourceSelect = document.getElementById("report-source");
+  const issueWrap = document.getElementById("report-issue-wrap");
+  const issueSelect = document.getElementById("report-issue");
+
+  const syncSourceUi = () => {
+    const fromIssue = isIssueSource(sourceSelect.value);
+    issueWrap.classList.toggle("hidden", !fromIssue);
+    issueSelect.required = fromIssue;
+  };
+  sourceSelect.addEventListener("change", syncSourceUi);
+  syncSourceUi();
 
   const readForm = () => {
     const fd = new FormData(document.getElementById("report-form"));
+    const source = String(fd.get("source"));
+    const issueId = isIssueSource(source) ? Number(fd.get("issueId") || 0) || null : null;
     return {
       title: String(fd.get("title")).trim(),
       purpose: String(fd.get("purpose")),
       company: String(fd.get("company")),
       procedure: String(fd.get("procedure")),
       sum: parseAmount(fd.get("sum")),
-      source: String(fd.get("source")),
+      source,
+      issueId,
       receipt: receiptCtl.getReceipt(),
     };
   };
@@ -3138,9 +4179,27 @@ function openReportEditor(existingId) {
     }
     const data = readForm();
     if (!data.title) return;
-    if (!Number.isFinite(data.sum) || data.sum < 0) {
+    if (!Number.isFinite(data.sum) || data.sum <= 0) {
       showAlert("Укажите сумму с двумя знаками после запятой, например 15 000,00", "Проверьте сумму");
       return;
+    }
+
+    if (isIssueSource(data.source)) {
+      if (!data.issueId) {
+        showAlert("Выберите выдачу, с которой списывается сумма отчёта.", "Выдача не выбрана");
+        return;
+      }
+      const available = issueAvailableRest(data.issueId, { excludeReportId: existing?.id || null });
+      // черновик не занимает остаток — при сохранении черновика тоже не даём указать больше доступного
+      if (data.sum > available + 0.001) {
+        showAlert(
+          `Сумма превышает остаток по выдаче № ${data.issueId}.\nДоступно: ${money(available)}.`,
+          "Превышение остатка"
+        );
+        return;
+      }
+    } else {
+      data.issueId = null;
     }
 
     receiptCtl.stop();
@@ -3149,7 +4208,7 @@ function openReportEditor(existingId) {
       Object.assign(existing, data, {
         status,
         reviewComment: status === "На проверке" ? "" : existing.reviewComment,
-        date: existing.date || "2026-08-12",
+        date: existing.date || new Date().toISOString().slice(0, 10),
       });
       logActivity({
         action: status === "На проверке" ? "submit" : "update",
@@ -3157,7 +4216,7 @@ function openReportEditor(existingId) {
         entityLabel: existing.id,
         detail:
           status === "На проверке"
-            ? `Отчёт «${existing.title}» отправлен на проверку (${money(existing.sum)})`
+            ? `Отчёт «${existing.title}» отправлен на проверку (${money(existing.sum)}${existing.issueId ? `, выдача № ${existing.issueId}` : ""})`
             : `Черновик отчёта «${existing.title}» сохранён`,
       });
     } else {
@@ -3166,7 +4225,7 @@ function openReportEditor(existingId) {
         authorId: currentUserId(),
         ...data,
         status,
-        date: "2026-08-12",
+        date: new Date().toISOString().slice(0, 10),
         reviewComment: "",
       };
       state.reports.unshift(row);
@@ -3176,24 +4235,9 @@ function openReportEditor(existingId) {
         entityLabel: row.id,
         detail:
           status === "На проверке"
-            ? `Отчёт «${row.title}» создан и отправлен на проверку (${money(row.sum)})`
+            ? `Отчёт «${row.title}» создан и отправлен на проверку (${money(row.sum)}${row.issueId ? `, выдача № ${row.issueId}` : ""})`
             : `Создан черновик отчёта «${row.title}»`,
       });
-    }
-
-    if (status === "На проверке" && String(data.source).includes("выдачи")) {
-      const funds = userFundSummary(currentUserId());
-      // после записи отчёта allocated уже включает его — если остаток отрицательный, откатим
-      if (funds.rest < 0 || funds.allocated > funds.issued) {
-        // уже сохранили — пересчитаем предупреждение
-        const over = Math.round((funds.allocated - funds.issued) * 100) / 100;
-        if (over > 0) {
-          showAlert(
-            `Сумма отчётов превышает выдачу на ${money(over)}. Остаток не может быть отрицательным — уменьшите сумму.`,
-            "Превышение остатка"
-          );
-        }
-      }
     }
 
     syncIssueBalancesForUser(currentUserId());
@@ -3205,6 +4249,28 @@ function openReportEditor(existingId) {
 
   document.getElementById("btn-save-draft").addEventListener("click", () => save("Черновик"));
   document.getElementById("btn-submit-report").addEventListener("click", () => save("На проверке"));
+  document.getElementById("btn-delete-draft")?.addEventListener("click", async () => {
+    if (!existing || existing.status !== "Черновик") return;
+    const ok = await showConfirm(
+      `Удалить черновик «${existing.title || existing.id}»?\n\nЭто действие нельзя отменить.`,
+      "Удаление черновика"
+    );
+    if (!ok) return;
+    receiptCtl.stop();
+    const idx = state.reports.findIndex((r) => r.id === existing.id);
+    if (idx >= 0) state.reports.splice(idx, 1);
+    logActivity({
+      action: "delete",
+      entity: "report",
+      entityLabel: existing.id,
+      detail: `Удалён черновик отчёта «${existing.title || existing.id}»`,
+    });
+    syncIssueBalancesForUser(currentUserId());
+    closeModal();
+    state.page = "my-reports";
+    renderNav();
+    render();
+  });
 }
 
 function openReportModal(id) {
@@ -3216,6 +4282,10 @@ function openReportModal(id) {
   }
 
   const isAdminReview = state.role === "admin" && r.status === "На проверке";
+  const isAdminApprovedComp =
+    state.role === "admin" && r.status === "Утверждён" && isCompensationSource(r.source);
+  const canWithdraw = state.role === "user" && r.status === "На проверке";
+  const issueLabel = r.issueId ? `№ ${r.issueId}` : "—";
 
   showModal(`
     <h3>${r.title}</h3>
@@ -3229,12 +4299,13 @@ function openReportModal(id) {
       <div class="field"><span>Процедура</span><div class="readonly">${r.procedure || "—"}</div></div>
       <div class="field"><span>Сумма</span><div class="readonly money">${money(r.sum)}</div></div>
       <div class="field"><span>Источник</span><div class="readonly">${r.source || "—"}</div></div>
+      <div class="field"><span>Выдача</span><div class="readonly">${issueLabel}</div></div>
       ${receiptViewMarkup(r.receipt)}
       ${r.reviewComment ? `<div class="field full"><span>Комментарий проверки</span><div class="readonly rework-box">${r.reviewComment}</div></div>` : ""}
       ${
         isAdminReview
-          ? `<label class="field full"><span>Комментарий при возврате <em class="optional-mark">нужен для доработки</em></span>
-              <textarea name="reviewComment" id="review-comment" rows="3" placeholder="Что нужно исправить пользователю"></textarea>
+          ? `<label class="field full"><span>Комментарий <em class="optional-mark">нужен для доработки или отклонения</em></span>
+              <textarea name="reviewComment" id="review-comment" rows="3" placeholder="Что нужно исправить или почему отклонён"></textarea>
             </label>`
           : ""
       }
@@ -3244,13 +4315,19 @@ function openReportModal(id) {
       <div class="modal-actions-right">
         ${
           isAdminReview
-            ? `<button type="button" class="btn btn-rework" id="btn-rework">Вернуть на доработку</button>
+            ? `<button type="button" class="btn btn-danger" id="btn-reject">Отклонить</button>
+               <button type="button" class="btn btn-rework" id="btn-rework">На доработку</button>
                <button type="button" class="btn btn-primary" id="btn-approve">Утвердить</button>`
             : ""
         }
         ${
-          state.role === "user" && r.status === "На проверке"
-            ? `<span class="muted-inline">Ожидает проверки администратора</span>`
+          isAdminApprovedComp
+            ? `<button type="button" class="btn btn-primary" id="btn-mark-paid">Отметить выплаченным</button>`
+            : ""
+        }
+        ${
+          canWithdraw
+            ? `<button type="button" class="btn btn-secondary" id="btn-withdraw">Отозвать с проверки</button>`
             : ""
         }
       </div>
@@ -3287,6 +4364,67 @@ function openReportModal(id) {
     });
     syncIssueBalancesForUser(r.authorId);
     closeModal();
+    render();
+  });
+
+  document.getElementById("btn-reject")?.addEventListener("click", async () => {
+    const comment = (document.getElementById("review-comment")?.value || "").trim();
+    if (!comment) {
+      showAlert("Укажите причину отклонения.", "Нужен комментарий");
+      return;
+    }
+    const ok = await showConfirm(
+      `Отклонить отчёт «${r.title}»?\n\nСумма перестанет занимать остаток по выдаче. Пользователь не сможет отправить этот отчёт снова — нужно создать новый.`,
+      "Отклонить отчёт"
+    );
+    if (!ok) return;
+    r.status = "Отклонён";
+    r.reviewComment = comment;
+    logActivity({
+      action: "reject",
+      entity: "report",
+      entityLabel: r.id,
+      detail: `Отчёт «${r.title}» отклонён (${money(r.sum)})`,
+    });
+    syncIssueBalancesForUser(r.authorId);
+    closeModal();
+    render();
+  });
+
+  document.getElementById("btn-mark-paid")?.addEventListener("click", async () => {
+    const ok = await showConfirm(
+      `Отметить отчёт «${r.title}» как выплаченный?\n\nЭто финальный статус для компенсации из собственных средств.`,
+      "Выплата"
+    );
+    if (!ok) return;
+    r.status = "Выплачено";
+    logActivity({
+      action: "pay",
+      entity: "report",
+      entityLabel: r.id,
+      detail: `Компенсация по отчёту «${r.title}» отмечена как выплаченная (${money(r.sum)})`,
+    });
+    closeModal();
+    render();
+  });
+
+  document.getElementById("btn-withdraw")?.addEventListener("click", async () => {
+    const ok = await showConfirm(
+      `Отозвать отчёт «${r.title}» с проверки?\n\nОн вернётся в черновики — можно править и отправить снова.`,
+      "Отзыв отчёта"
+    );
+    if (!ok) return;
+    r.status = "Черновик";
+    logActivity({
+      action: "withdraw",
+      entity: "report",
+      entityLabel: r.id,
+      detail: `Отчёт «${r.title}» отозван с проверки`,
+    });
+    syncIssueBalancesForUser(r.authorId);
+    closeModal();
+    state.page = "my-reports";
+    renderNav();
     render();
   });
 }
@@ -3387,6 +4525,14 @@ function bindGo() {
 
 /* —— boot —— */
 try {
+  loadSessionEpochs();
+
+  window.addEventListener("storage", (e) => {
+    if (e.key !== SESSION_EPOCH_KEY) return;
+    loadSessionEpochs();
+    if (state.role) assertSession();
+  });
+
   document.getElementById("login-form").addEventListener("submit", (e) => {
     e.preventDefault();
     const email = document.getElementById("login-email").value;
