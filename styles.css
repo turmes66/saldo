@@ -749,10 +749,12 @@ button.card-link:hover {
 }
 
 .funds-block .section-head {
-  display: flex;
-  align-items: flex-start;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: start;
   gap: 12px;
   margin-bottom: 16px;
+  width: 100%;
 }
 
 .funds-collapse-toggle {
@@ -768,7 +770,29 @@ button.card-link:hover {
   color: inherit;
   font: inherit;
   min-width: 0;
-  flex: 1 1 auto;
+  width: 100%;
+}
+
+.funds-block-aside {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+  justify-self: end;
+}
+
+.funds-collapse-chevron {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  flex-shrink: 0;
+  margin-top: 1px;
+  cursor: pointer;
+  justify-self: end;
+  transition: transform 0.18s ease, background 0.15s, color 0.15s;
 }
 
 .funds-collapse-toggle .icon {
@@ -804,20 +828,6 @@ button.card-link:hover {
   margin: 0;
 }
 
-.funds-collapse-chevron {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  display: grid;
-  place-items: center;
-  color: var(--muted);
-  flex-shrink: 0;
-  margin-top: 1px;
-  margin-left: 0;
-  cursor: pointer;
-  transition: transform 0.18s ease, background 0.15s, color 0.15s;
-}
-
 .funds-collapse-chevron svg {
   width: 18px;
   height: 18px;
@@ -835,6 +845,8 @@ button.card-link:hover {
 .funds-collapse-body {
   display: grid;
   gap: 12px;
+  min-width: 0;
+  width: 100%;
 }
 
 .funds-block.is-collapsed .funds-collapse-body {
@@ -850,13 +862,6 @@ button.card-link:hover {
   font-size: 0.82rem;
   line-height: 1.4;
   color: var(--muted);
-}
-
-.funds-block-aside {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  flex-shrink: 0;
 }
 
 .funds-block-metric {
@@ -881,19 +886,22 @@ button.card-link:hover {
 
 @media (max-width: 720px) {
   .funds-block .section-head {
-    flex-wrap: wrap;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "title chevron"
+      "aside aside";
   }
 
   .funds-collapse-toggle {
-    flex: 1 1 calc(100% - 40px);
+    grid-area: title;
   }
 
   .funds-collapse-chevron {
-    order: 2;
+    grid-area: chevron;
   }
 
   .funds-block-aside {
-    order: 3;
+    grid-area: aside;
     width: 100%;
     justify-content: space-between;
   }
@@ -1193,36 +1201,32 @@ table.data tbody tr:hover {
 }
 
 .filters-bar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items: stretch;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px 12px;
+  align-items: end;
   margin-bottom: 16px;
   width: 100%;
   max-width: 100%;
-  overflow: visible;
 }
 
 .filters-search {
-  flex: 2 1 180px;
+  grid-column: 1 / -1;
   min-width: 0;
+  width: 100%;
 }
 
 .filters-bar .filter-select,
 .filters-bar .btn {
   box-sizing: border-box;
   min-height: 40px;
-  height: auto;
-  padding: 8px 12px;
+  height: 40px;
+  padding: 0 12px;
   border-radius: 12px;
-  font-size: clamp(0.75rem, 0.7rem + 0.25vw, 0.85rem);
+  font-size: 0.85rem;
   font-weight: 600;
-  line-height: 1.2;
-}
-
-.filters-bar .filter-select {
-  flex: 1 1 110px;
-  width: auto;
+  line-height: 1;
+  width: 100%;
   min-width: 0;
   max-width: none;
 }
@@ -1231,70 +1235,93 @@ table.data tbody tr:hover {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  white-space: normal;
-  flex: 1 1 120px;
-  min-width: 0;
+  white-space: nowrap;
   text-align: center;
+  height: auto;
+  min-height: 40px;
+  padding: 10px 12px;
 }
 
 .filters-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: stretch;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 10px;
-  margin-left: 0;
-  flex: 1 1 160px;
+  width: 100%;
   min-width: 0;
 }
 
 .filters-actions .btn {
-  flex: 1 1 0;
+  width: 100%;
 }
 
 .filters-reset {
-  white-space: normal;
+  white-space: nowrap;
 }
 
 .filters-bar > .filters-reset {
-  margin-left: 0;
-  flex: 1 1 140px;
+  width: 100%;
 }
 
-.filter-date {
-  display: inline-flex;
-  align-items: center;
+.filter-date,
+.filter-amount {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
   gap: 6px;
   color: var(--muted);
-  font-size: clamp(0.75rem, 0.7rem + 0.25vw, 0.85rem);
-  font-weight: 600;
-  flex: 1 1 140px;
+  font-size: 0.78rem;
+  font-weight: 650;
   min-width: 0;
-  white-space: nowrap;
+  width: 100%;
+  white-space: normal;
 }
 
-.filter-date > span {
+.filter-date > span,
+.filter-amount > span {
   white-space: nowrap;
-  flex-shrink: 0;
+  line-height: 1.2;
 }
 
-.filter-date .filter-select {
-  flex: 1 1 auto;
+.filter-date .filter-select,
+.filter-amount .filter-select {
   width: 100%;
   min-width: 0;
   max-width: none;
   color: var(--text);
   font-weight: 600;
+  font-size: 0.85rem;
 }
 
-.filter-amount {
-  flex: 1 1 110px;
-  min-width: 0;
+@media (min-width: 1100px) {
+  .filters-bar {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .filters-search {
+    grid-column: span 2;
+  }
 }
 
-.filter-amount .filter-select {
-  width: 100%;
-  min-width: 0;
-  max-width: none;
+@media (max-width: 720px) {
+  .filters-bar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .filters-search,
+  .filters-bar > .filters-reset,
+  .filters-actions {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 480px) {
+  .filters-bar {
+    grid-template-columns: 1fr;
+  }
+
+  .filters-actions {
+    grid-template-columns: 1fr;
+  }
 }
 
 .modal-actions {
@@ -1307,7 +1334,7 @@ table.data tbody tr:hover {
 }
 
 .modal-actions .btn {
-  flex: 1 1 120px;
+  flex: 1 1 140px;
   min-width: 0;
   justify-content: center;
   text-align: center;
@@ -1329,32 +1356,6 @@ table.data tbody tr:hover {
   line-height: 1.25;
   padding-top: 10px;
   padding-bottom: 10px;
-}
-
-@media (max-width: 720px) {
-  .filters-search {
-    flex: 1 1 100%;
-  }
-
-  .filters-bar .filter-select,
-  .filter-date,
-  .filter-amount,
-  .filters-bar > .filters-reset,
-  .filters-actions {
-    flex: 1 1 calc(50% - 5px);
-  }
-}
-
-@media (max-width: 480px) {
-  .filters-bar .filter-select,
-  .filter-date,
-  .filter-amount,
-  .filters-bar > .filters-reset,
-  .filters-actions,
-  .modal-actions .btn,
-  .modal-actions-fill .btn {
-    flex: 1 1 100%;
-  }
 }
 
 .report-card-side {
