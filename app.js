@@ -1116,28 +1116,30 @@ function renderReportsAdmin() {
       Для компенсации из своих средств после утверждения доступен статус «Выплачено».
       Сейчас на проверке: <strong>${awaiting}</strong>
     </div>
-    <div class="filters-bar">
+    <div class="filters-stack">
       <div class="search-wrap filters-search">
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-        <input class="search" id="report-search" placeholder="Поиск по автору, № или названию..." />
+        <input class="search" id="report-search" placeholder="Поиск по автору, № или названию..." autocomplete="off" />
       </div>
-      <select id="filter-status" class="filter-select" title="Статус">
-        <option value="all" selected>Все статусы</option>
-        <option value="На проверке">На проверке</option>
-        <option value="На доработке">На доработке</option>
-        <option value="Утверждён">Утверждён</option>
-        <option value="Выплачено">Выплачено</option>
-        <option value="Отклонён">Отклонён</option>
-      </select>
-      <select id="filter-company" class="filter-select" title="Компания">
-        <option value="all">Все компании</option>
-        ${companies.map((c) => `<option value="${c}">${c}</option>`).join("")}
-      </select>
-      <select id="filter-purpose" class="filter-select" title="Назначение">
-        <option value="all">Все назначения</option>
-        ${purposes.map((p) => `<option value="${p}">${p}</option>`).join("")}
-      </select>
-      <button type="button" class="btn btn-secondary btn-sm filters-reset" id="btn-clear-filters" title="Сбросить поиск и фильтры">Снять все фильтры</button>
+      <div class="filters-bar">
+        <select id="filter-status" class="filter-select" title="Статус">
+          <option value="all" selected>Все статусы</option>
+          <option value="На проверке">На проверке</option>
+          <option value="На доработке">На доработке</option>
+          <option value="Утверждён">Утверждён</option>
+          <option value="Выплачено">Выплачено</option>
+          <option value="Отклонён">Отклонён</option>
+        </select>
+        <select id="filter-company" class="filter-select" title="Компания">
+          <option value="all">Все компании</option>
+          ${companies.map((c) => `<option value="${c}">${c}</option>`).join("")}
+        </select>
+        <select id="filter-purpose" class="filter-select" title="Назначение">
+          <option value="all">Все назначения</option>
+          ${purposes.map((p) => `<option value="${p}">${p}</option>`).join("")}
+        </select>
+        <button type="button" class="btn btn-secondary btn-sm filters-reset" id="btn-clear-filters" title="Сбросить поиск и фильтры">Снять все фильтры</button>
+      </div>
     </div>
     <div id="reports-wrap"></div>
   `;
@@ -1314,8 +1316,10 @@ function renderIssues() {
         <option value="all" selected>Все получатели</option>
         ${recipients.map((n) => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join("")}
       </select>
-      <label class="filter-date"><span>Период с</span><input type="date" id="issue-filter-from" class="filter-select" value="" /></label>
-      <label class="filter-date"><span>по</span><input type="date" id="issue-filter-to" class="filter-select" value="" /></label>
+      <div class="filter-date-range">
+        <label class="filter-date"><span>Период с</span><input type="date" id="issue-filter-from" class="filter-select" value="" /></label>
+        <label class="filter-date"><span>по</span><input type="date" id="issue-filter-to" class="filter-select" value="" /></label>
+      </div>
       <select id="issue-filter-company" class="filter-select" title="Компания">
         <option value="all" selected>Все компании</option>
         ${companies.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("")}
@@ -1708,14 +1712,19 @@ function renderReceipts() {
     <p class="section-note" style="margin-top:0">
       Здесь фиксируются поступления администратору: от пользователей (возвраты, передачи) и от компаний.
       Удаление не используется — записи архивируются и не входят в сводку движения.
+      Приходы, которые пользователь зарегистрировал сам, согласуются в разделе
+      <button type="button" class="linkish" data-go="incomes">«Приходы»</button>
+      (принять / отклонить).
     </p>
     <div class="filters-bar">
       <select id="receipt-filter-payer" class="filter-select" title="От кого">
         <option value="all" selected>Все плательщики</option>
         ${payers.map((n) => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join("")}
       </select>
-      <label class="filter-date"><span>Период с</span><input type="date" id="receipt-filter-from" class="filter-select" value="" /></label>
-      <label class="filter-date"><span>по</span><input type="date" id="receipt-filter-to" class="filter-select" value="" /></label>
+      <div class="filter-date-range">
+        <label class="filter-date"><span>Период с</span><input type="date" id="receipt-filter-from" class="filter-select" value="" /></label>
+        <label class="filter-date"><span>по</span><input type="date" id="receipt-filter-to" class="filter-select" value="" /></label>
+      </div>
       <select id="receipt-filter-company" class="filter-select" title="Компания">
         <option value="all" selected>Все компании</option>
         ${companies.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("")}
@@ -1776,6 +1785,7 @@ function renderReceipts() {
   });
   document.getElementById("btn-new-receipt").addEventListener("click", openReceiptModal);
   paint();
+  bindGo();
 }
 
 function openReceiptModal() {
@@ -1967,19 +1977,23 @@ function renderCashflow() {
   const defaultTo = "2026-08-13";
 
   els.content.innerHTML = `
-    <div class="filters-bar">
-      <label class="filter-date"><span>Период с</span><input type="date" id="cf-from" class="filter-select" value="${defaultFrom}" /></label>
-      <label class="filter-date"><span>по</span><input type="date" id="cf-to" class="filter-select" value="${defaultTo}" /></label>
-      <select id="cf-kind" class="filter-select" title="Тип операции">
-        <option value="all">Все операции</option>
-        <option value="in">Только поступления</option>
-        <option value="out">Только выдачи</option>
-      </select>
+    <div class="filters-stack">
       <div class="search-wrap filters-search">
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-        <input class="search" id="cf-search" placeholder="Поиск по контрагенту или назначению..." />
+        <input class="search" id="cf-search" placeholder="Поиск по контрагенту или назначению..." autocomplete="off" />
       </div>
-      <button type="button" class="btn btn-secondary btn-sm filters-reset" id="cf-clear">Снять все фильтры</button>
+      <div class="filters-bar">
+        <div class="filter-date-range">
+          <label class="filter-date"><span>Период с</span><input type="date" id="cf-from" class="filter-select" value="${defaultFrom}" /></label>
+          <label class="filter-date"><span>по</span><input type="date" id="cf-to" class="filter-select" value="${defaultTo}" /></label>
+        </div>
+        <select id="cf-kind" class="filter-select" title="Тип операции">
+          <option value="all">Все операции</option>
+          <option value="in">Только поступления</option>
+          <option value="out">Только выдачи</option>
+        </select>
+        <button type="button" class="btn btn-secondary btn-sm filters-reset" id="cf-clear">Снять все фильтры</button>
+      </div>
     </div>
     <div class="grid-3" id="cf-stats"></div>
     <div class="section" style="margin-top:18px">
@@ -2899,11 +2913,39 @@ function incomeAuthorName(row) {
 function adminIncomes() {
   return state.userIncomes
     .map(normalizeUserIncome)
-    .filter((r) => r.status !== "Черновик");
+    .filter((r) => r.status && r.status !== "Черновик")
+    .sort((a, b) => {
+      const rank = (s) => (s === "На проверке" ? 0 : s === "Принят" ? 1 : 2);
+      const d = rank(a.status) - rank(b.status);
+      if (d !== 0) return d;
+      return String(b.date).localeCompare(String(a.date)) || Number(b.id) - Number(a.id);
+    });
 }
 
 function incomesAwaitingReview() {
-  return state.userIncomes.filter((r) => normalizeUserIncome(r).status === "На проверке");
+  return state.userIncomes.map(normalizeUserIncome).filter((r) => r.status === "На проверке");
+}
+
+const USER_INCOMES_STORE_KEY = "saldo_user_incomes_v1";
+
+function persistUserIncomes() {
+  try {
+    localStorage.setItem(USER_INCOMES_STORE_KEY, JSON.stringify(state.userIncomes));
+  } catch {
+    /* ignore */
+  }
+}
+
+function loadUserIncomes() {
+  try {
+    const raw = localStorage.getItem(USER_INCOMES_STORE_KEY);
+    if (!raw) return;
+    const list = JSON.parse(raw);
+    if (!Array.isArray(list)) return;
+    state.userIncomes = list.map((row) => normalizeUserIncome({ ...row }));
+  } catch {
+    /* ignore */
+  }
 }
 
 /** Типы бизнес-приходов, которые пользователь принял от имени компании */
@@ -3069,6 +3111,7 @@ function bindUserIncomeArchiveActions() {
       );
       if (!ok) return;
       row.status = archived ? "Принят" : "Архив";
+      persistUserIncomes();
       logActivity({
         action: archived ? "restore" : "archive",
         entity: "income",
@@ -3316,10 +3359,17 @@ function openMyIncomeModal(existingId = null) {
       });
     }
 
+    persistUserIncomes();
     closeModal();
     state.page = "funds";
     renderNav();
     render();
+    if (status === "На проверке") {
+      showAlert(
+        "Приход отправлен администратору.\nОткройте раздел «Приходы» под учётной записью администратора, чтобы принять или отклонить.",
+        "Отправлено на проверку"
+      );
+    }
   };
 
   document.getElementById("btn-save-income-draft").addEventListener("click", () => save("Черновик"));
@@ -3333,6 +3383,7 @@ function openMyIncomeModal(existingId = null) {
     if (!ok) return;
     const idx = state.userIncomes.findIndex((x) => x.id === existing.id);
     if (idx >= 0) state.userIncomes.splice(idx, 1);
+    persistUserIncomes();
     logActivity({
       action: "delete",
       entity: "income",
@@ -3403,6 +3454,7 @@ function openIncomeModal(id) {
   document.getElementById("btn-accept-income")?.addEventListener("click", () => {
     row.status = "Принят";
     row.reviewComment = "";
+    persistUserIncomes();
     logActivity({
       action: "accept",
       entity: "income",
@@ -3426,6 +3478,7 @@ function openIncomeModal(id) {
     if (!ok) return;
     row.status = "Отклонён";
     row.reviewComment = comment;
+    persistUserIncomes();
     logActivity({
       action: "reject",
       entity: "income",
@@ -3443,6 +3496,7 @@ function openIncomeModal(id) {
     );
     if (!ok) return;
     row.status = "Черновик";
+    persistUserIncomes();
     logActivity({
       action: "withdraw",
       entity: "income",
@@ -3473,8 +3527,8 @@ function renderIncomesAdmin() {
         <input class="search" id="income-admin-search" placeholder="Поиск по автору, основанию или №..." />
       </div>
       <select id="income-admin-status" class="filter-select" title="Статус">
-        <option value="all" selected>Все статусы</option>
-        <option value="На проверке">На проверке</option>
+        <option value="На проверке" selected>На проверке</option>
+        <option value="all">Все статусы</option>
         <option value="Принят">Принят</option>
         <option value="Отклонён">Отклонён</option>
         <option value="Архив">Архив</option>
@@ -3540,7 +3594,13 @@ function renderIncomesAdmin() {
             </tr>`;
           })
           .join("")
-      : `<tr><td colspan="9" class="empty">${rows.length ? "Ничего не найдено" : "Приходов на проверке пока нет"}</td></tr>`;
+      : `<tr><td colspan="9" class="empty">${
+          status === "На проверке"
+            ? "Нет приходов на проверке. Пользователь должен нажать «Отправить на проверку», а не только сохранить черновик."
+            : rows.length
+              ? "Ничего не найдено"
+              : "Приходов пока нет"
+        }</td></tr>`;
 
     document.querySelectorAll("[data-open-income]").forEach((btn) => {
       btn.addEventListener("click", () => openIncomeModal(btn.dataset.openIncome));
@@ -3553,7 +3613,7 @@ function renderIncomesAdmin() {
   });
   document.getElementById("income-admin-clear").addEventListener("click", () => {
     document.getElementById("income-admin-search").value = "";
-    document.getElementById("income-admin-status").value = "all";
+    document.getElementById("income-admin-status").value = "На проверке";
     document.getElementById("income-admin-company").value = "all";
     paint();
   });
@@ -3824,8 +3884,10 @@ function renderFunds() {
               <input class="search" id="receipts-search" placeholder="Поиск по № поступления" inputmode="numeric" autocomplete="off" />
             </div>
             <div class="filters-bar">
-              <label class="filter-date"><span>Период с</span><input type="date" id="receipts-filter-from" class="filter-select" value="" /></label>
-              <label class="filter-date"><span>по</span><input type="date" id="receipts-filter-to" class="filter-select" value="" /></label>
+              <div class="filter-date-range">
+                <label class="filter-date"><span>Период с</span><input type="date" id="receipts-filter-from" class="filter-select" value="" /></label>
+                <label class="filter-date"><span>по</span><input type="date" id="receipts-filter-to" class="filter-select" value="" /></label>
+              </div>
               <select id="receipts-filter-purpose" class="filter-select" title="Назначение">
                 <option value="all" selected>Все назначения</option>
                 ${purposes.map((p) => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join("")}
@@ -3834,8 +3896,10 @@ function renderFunds() {
                 <option value="active" selected>Активные</option>
                 <option value="archive">Архив</option>
               </select>
-              <label class="filter-date filter-amount"><span>Сумма от</span><input type="text" id="receipts-filter-amount-from" class="filter-select" inputmode="decimal" placeholder="—" /></label>
-              <label class="filter-date filter-amount"><span>до</span><input type="text" id="receipts-filter-amount-to" class="filter-select" inputmode="decimal" placeholder="—" /></label>
+              <div class="filter-date-range">
+                <label class="filter-date filter-amount"><span>Сумма от</span><input type="text" id="receipts-filter-amount-from" class="filter-select" inputmode="decimal" placeholder="—" /></label>
+                <label class="filter-date filter-amount"><span>до</span><input type="text" id="receipts-filter-amount-to" class="filter-select" inputmode="decimal" placeholder="—" /></label>
+              </div>
               <button type="button" class="btn btn-secondary btn-sm filters-reset" id="receipts-clear-filters">Снять все фильтры</button>
             </div>
           </div>
@@ -3866,8 +3930,10 @@ function renderFunds() {
               <input class="search" id="income-search" placeholder="Поиск по основанию, компании или комментарию" autocomplete="off" />
             </div>
             <div class="filters-bar">
-              <label class="filter-date"><span>Период с</span><input type="date" id="income-filter-from" class="filter-select" value="" /></label>
-              <label class="filter-date"><span>по</span><input type="date" id="income-filter-to" class="filter-select" value="" /></label>
+              <div class="filter-date-range">
+                <label class="filter-date"><span>Период с</span><input type="date" id="income-filter-from" class="filter-select" value="" /></label>
+                <label class="filter-date"><span>по</span><input type="date" id="income-filter-to" class="filter-select" value="" /></label>
+              </div>
               <select id="income-filter-type" class="filter-select" title="Тип прихода">
                 <option value="all" selected>Все типы</option>
                 ${incomeTypes.map((t) => `<option value="${t.id}">${escapeHtml(t.label)}</option>`).join("")}
@@ -4921,11 +4987,18 @@ function bindGo() {
 /* —— boot —— */
 try {
   loadSessionEpochs();
+  loadUserIncomes();
 
   window.addEventListener("storage", (e) => {
-    if (e.key !== SESSION_EPOCH_KEY) return;
-    loadSessionEpochs();
-    if (state.role) assertSession();
+    if (e.key === SESSION_EPOCH_KEY) {
+      loadSessionEpochs();
+      if (state.role) assertSession();
+    }
+    if (e.key === USER_INCOMES_STORE_KEY) {
+      loadUserIncomes();
+      if (state.role === "admin" && state.page === "incomes") renderIncomesAdmin();
+      if (state.role === "user" && (state.page === "funds" || state.page === "home")) render();
+    }
   });
 
   document.getElementById("login-form").addEventListener("submit", (e) => {
