@@ -88,7 +88,8 @@ const state = {
       purpose: "Ноутбук и монитор",
       procedure: "",
       note: "Продажа списанной офисной техники",
-      status: "Активна",
+      status: "Принят",
+      reviewComment: "",
     },
     {
       id: 302,
@@ -101,7 +102,22 @@ const state = {
       purpose: "Оплата услуг по сопровождению",
       procedure: "Дело А40-88",
       note: "",
-      status: "Активна",
+      status: "На проверке",
+      reviewComment: "",
+    },
+    {
+      id: 303,
+      userId: 4,
+      amount: 8500,
+      date: "2026-08-12",
+      type: "procedure",
+      company: "ССПБ",
+      fromName: "АО «Вектор»",
+      purpose: "Возмещение расходов по процедуре",
+      procedure: "Дело А40-112",
+      note: "",
+      status: "На проверке",
+      reviewComment: "",
     },
   ],
   reports: [
@@ -324,6 +340,7 @@ function badge(status) {
     Архив: "neutral",
     "На проверке": "warn",
     Утверждён: "ok",
+    Принят: "ok",
     Выплачено: "ok",
     Завершён: "ok",
     Черновик: "neutral",
@@ -516,6 +533,7 @@ function activityActionLabel(action) {
     logout: "Выход",
     submit: "Отправка",
     approve: "Утверждение",
+    accept: "Принятие",
     rework: "Возврат на доработку",
     reject: "Отклонение",
     withdraw: "Отзыв",
@@ -835,6 +853,7 @@ function renderNav() {
       ${navButton("receipts", "Получение денежных средств", icons.inflow, p === "receipts")}
       ${navButton("cashflow", "Движение денежных средств", icons.flow, p === "cashflow")}
       ${navButton("reports", "Отчёты", icons.report, p === "reports")}
+      ${navButton("incomes", "Приходы", icons.wallet, p === "incomes")}
       ${navButton("users", "Пользователи", icons.users, p === "users")}
       ${navButton("dicts", "Справочники", icons.book, p === "dicts" || String(p).startsWith("dict-"))}
       ${navButton("history", "Журнал действий", icons.history, p === "history")}
@@ -869,6 +888,7 @@ function render() {
     if (page === "receipts") return renderReceipts();
     if (page === "cashflow") return renderCashflow();
     if (page === "reports") return renderReportsAdmin();
+    if (page === "incomes") return renderIncomesAdmin();
     if (page === "users") return renderUsers();
     if (page === "dicts") return renderDictsBoard();
     if (page.startsWith("dict-")) return renderDictList(page.replace("dict-", ""));
@@ -953,8 +973,8 @@ function renderAdminHome() {
       <div class="grid-4">
         <button type="button" class="card stat card-link" data-go="users"><div class="label">Активные пользователи</div><div class="value">${activeUsers}</div><div class="hint">из ${state.users.length} учётных записей</div></button>
         <button type="button" class="card stat card-link" data-go="issues"><div class="label">Выдачи</div><div class="value">${state.issues.length}</div><div class="hint">всего операций</div></button>
-        <button type="button" class="card stat card-link" data-go="reports"><div class="label">Отчёты</div><div class="value">${adminReports().length}</div><div class="hint">на проверке и утверждённые</div></button>
-        <button type="button" class="card stat card-link" data-go="reports"><div class="label">На проверке</div><div class="value">${state.reports.filter((r) => r.status === "На проверке").length}</div><div class="hint">требуют внимания</div></button>
+        <button type="button" class="card stat card-link" data-go="reports"><div class="label">Отчёты на проверке</div><div class="value">${state.reports.filter((r) => r.status === "На проверке").length}</div><div class="hint">требуют внимания</div></button>
+        <button type="button" class="card stat card-link" data-go="incomes"><div class="label">Приходы на проверке</div><div class="value">${incomesAwaitingReview().length}</div><div class="hint">принять или отклонить</div></button>
       </div>
     </div>
 
@@ -975,10 +995,10 @@ function renderAdminHome() {
           <p>Сводный просмотр отчётов по авторам, компаниям и процедурам.</p>
           <span class="pc-go">Перейти</span>
         </button>
-        <button type="button" class="product-card g4" data-go="users">
-          <span class="pc-icon">${icons.users}</span>
-          <strong>Пользователи</strong>
-          <p>Создание учётных записей, блокировка и сброс пароля.</p>
+        <button type="button" class="product-card g4" data-go="incomes">
+          <span class="pc-icon">${icons.wallet}</span>
+          <strong>Приходы</strong>
+          <p>Принять или отклонить приходы, зарегистрированные пользователями.</p>
           <span class="pc-go">Перейти</span>
         </button>
       </div>
@@ -1008,7 +1028,7 @@ function renderUserHome() {
         <h3 class="widget-title">${icons.inflow} Принятые поступления</h3>
         <div class="stat" style="padding:0">
           <div class="value">${money(incomeMonth)}</div>
-          <div class="hint">за ${monthLabel.toLowerCase()} · деньги бизнеса, принятые вами</div>
+          <div class="hint">за ${monthLabel.toLowerCase()} · только принятые администратором</div>
         </div>
         <button type="button" class="btn btn-secondary" style="margin-top:14px" data-action="new-income">Зарегистрировать приход</button>
       </div>
@@ -1028,7 +1048,7 @@ function renderUserHome() {
         <button type="button" class="product-card g2" data-action="new-income">
           <span class="pc-icon">${icons.inflow}</span>
           <strong>Зарегистрировать приход</strong>
-          <p>Оплата от контрагента, поступление по процедуре или продажа имущества компании.</p>
+          <p>Отправить приход на проверку администратору.</p>
           <span class="pc-go">Добавить</span>
         </button>
         <button type="button" class="product-card g4" data-go="report-summary">
@@ -2853,8 +2873,37 @@ function activityRowsHtml(rows) {
     .join("");
 }
 
+function isUserIncomeArchived(row) {
+  return String(row?.status || "").startsWith("Архив");
+}
+
+/** Принятый админом приход (учитывается в сводках) */
+function isUserIncomeAccepted(row) {
+  const s = String(row?.status || "");
+  return s === "Принят" || s === "Активна";
+}
+
 function isUserIncomeActive(row) {
-  return !String(row?.status || "Активна").startsWith("Архив");
+  return isUserIncomeAccepted(row) && !isUserIncomeArchived(row);
+}
+
+function canUserEditIncome(row) {
+  return row && row.status === "Черновик";
+}
+
+function incomeAuthorName(row) {
+  const u = userById(row.userId);
+  return u ? fullName(u) : "—";
+}
+
+function adminIncomes() {
+  return state.userIncomes
+    .map(normalizeUserIncome)
+    .filter((r) => r.status !== "Черновик");
+}
+
+function incomesAwaitingReview() {
+  return state.userIncomes.filter((r) => normalizeUserIncome(r).status === "На проверке");
 }
 
 /** Типы бизнес-приходов, которые пользователь принял от имени компании */
@@ -2911,6 +2960,10 @@ function normalizeUserIncome(row) {
   row.procedure = row.procedure || "";
   row.purpose = row.purpose || row.purposeDetail || "";
   row.note = row.note || "";
+  row.reviewComment = row.reviewComment || "";
+  // старый статус «Активна» = уже принятый приход
+  if (row.status === "Активна") row.status = "Принят";
+  if (!row.status) row.status = "Черновик";
   return row;
 }
 
@@ -2957,10 +3010,15 @@ function userIncomeRows(rows) {
   return rows
     .map((r) => {
       const row = normalizeUserIncome(r);
-      const archived = !isUserIncomeActive(row);
+      const archived = isUserIncomeArchived(row);
       const sub = [row.fromName ? `от: ${row.fromName}` : "", row.procedure ? `процедура: ${row.procedure}` : ""]
         .filter(Boolean)
         .join(" · ");
+      const canArchive = row.status === "Принят";
+      const canRestore = archived;
+      const actionBtn = canUserEditIncome(row)
+        ? `<button type="button" class="btn btn-secondary btn-sm" data-act="edit-income">Редактировать</button>`
+        : `<button type="button" class="btn btn-secondary btn-sm" data-act="open-income">Открыть</button>`;
       return `<tr class="${archived ? "is-archived" : ""}" data-income-id="${row.id}">
         <td>${row.id}</td>
         <td>${formatDate(row.date)}</td>
@@ -2970,14 +3028,20 @@ function userIncomeRows(rows) {
           <div class="dict-primary">
             <div class="dict-name">${escapeHtml(row.purpose || "—")}</div>
             ${sub ? `<div class="dict-sub">${escapeHtml(sub)}</div>` : ""}
+            ${row.status === "Отклонён" && row.reviewComment ? `<div class="dict-sub rework-note">Причина: ${escapeHtml(row.reviewComment)}</div>` : ""}
           </div>
         </td>
         <td class="money">${money(row.amount)}</td>
         <td>${escapeHtml(row.note || "—")}</td>
-        <td>${badge(archived ? "Архив" : "Активна")}</td>
+        <td>${badge(archived ? "Архив" : row.status)}</td>
         <td>
-          <div class="dict-actions">
-            <button type="button" class="dict-act archive" data-act="archive-income" title="${archived ? "Вернуть из архива" : "Архивировать"}">${archived ? iconRestore : iconArchive}</button>
+          <div class="dict-actions" style="gap:8px;flex-wrap:wrap">
+            ${actionBtn}
+            ${
+              canArchive || canRestore
+                ? `<button type="button" class="dict-act archive" data-act="archive-income" title="${canRestore ? "Вернуть из архива" : "Архивировать"}">${canRestore ? iconRestore : iconArchive}</button>`
+                : ""
+            }
           </div>
         </td>
       </tr>`;
@@ -2991,24 +3055,41 @@ function bindUserIncomeArchiveActions() {
       const id = Number(btn.closest("tr")?.dataset.incomeId);
       const row = state.userIncomes.find((x) => x.id === id);
       if (!row || row.userId !== currentUserId()) return;
-      const archived = !isUserIncomeActive(row);
+      normalizeUserIncome(row);
+      const archived = isUserIncomeArchived(row);
+      if (!archived && row.status !== "Принят") {
+        showAlert("В архив можно отправить только принятый приход.", "Архивирование");
+        return;
+      }
       const ok = await showConfirm(
         archived
-          ? `Вернуть приход № ${row.id} в список активных?`
+          ? `Вернуть приход № ${row.id} в список принятых?`
           : `Архивировать приход № ${row.id}?\n\nЗапись останется в истории. Удаление не выполняется.`,
         archived ? "Вернуть из архива" : "Архивировать приход"
       );
       if (!ok) return;
-      row.status = archived ? "Активна" : "Архив";
+      row.status = archived ? "Принят" : "Архив";
       logActivity({
         action: archived ? "restore" : "archive",
         entity: "income",
         entityLabel: `Приход № ${row.id}`,
         detail: archived
-          ? `Приход возвращён (${money(row.amount)}): ${incomeTypeLabel(row)} · ${row.purpose || row.company}`
+          ? `Приход возвращён из архива (${money(row.amount)}): ${incomeTypeLabel(row)} · ${row.purpose || row.company}`
           : `Приход архивирован (${money(row.amount)}): ${incomeTypeLabel(row)} · ${row.purpose || row.company}`,
       });
       renderFunds();
+    });
+  });
+  document.querySelectorAll("[data-act='edit-income']").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const id = Number(btn.closest("tr")?.dataset.incomeId);
+      openMyIncomeModal(id);
+    });
+  });
+  document.querySelectorAll("[data-act='open-income']").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const id = Number(btn.closest("tr")?.dataset.incomeId);
+      openIncomeModal(id);
     });
   });
 }
@@ -3020,21 +3101,31 @@ function renderMyIncome() {
   renderFunds();
 }
 
-function openMyIncomeModal() {
+function openMyIncomeModal(existingId = null) {
+  const existing = existingId ? state.userIncomes.find((x) => x.id === Number(existingId)) : null;
+  if (existing) {
+    normalizeUserIncome(existing);
+    if (!canUserEditIncome(existing) || existing.userId !== currentUserId()) {
+      return openIncomeModal(existingId);
+    }
+  }
+
   const companies = state.dicts.companies.filter((c) => c.status === "Активна");
   const procedures = state.dicts.procedures.filter((p) => p.status === "Активна");
   const today = new Date().toISOString().slice(0, 10);
+  const initialType = existing?.type || "counterparty";
   const typeButtons = Object.values(USER_INCOME_TYPES)
     .map(
-      (t, idx) =>
-        `<button type="button" class="password-mode-btn${idx === 0 ? " is-active" : ""}" data-income-type="${t.id}">${escapeHtml(t.label)}</button>`
+      (t) =>
+        `<button type="button" class="password-mode-btn${t.id === initialType ? " is-active" : ""}" data-income-type="${t.id}">${escapeHtml(t.label)}</button>`
     )
     .join("");
 
   showModal(`
-    <h3>Зарегистрировать приход</h3>
+    <h3>${existing ? "Редактирование прихода" : "Зарегистрировать приход"}</h3>
     <p class="section-note" style="margin-top:0">
       Фиксируйте только деньги <strong>бизнеса</strong>, которые вы приняли.
+      После отправки приход проверит администратор: примет или отклонит (без доработки).
       Личные доходы, зарплата и премии здесь не учитываются.
     </p>
     <form id="income-form" class="form-grid">
@@ -3043,41 +3134,57 @@ function openMyIncomeModal() {
         <div class="password-mode issue-kind-mode income-type-mode" role="group" aria-label="Тип прихода">
           ${typeButtons}
         </div>
-        <input type="hidden" name="type" id="income-type" value="counterparty" />
-        <p class="password-hint" id="income-type-hint">${escapeHtml(USER_INCOME_TYPES.counterparty.hint)}</p>
+        <input type="hidden" name="type" id="income-type" value="${escapeHtml(initialType)}" />
+        <p class="password-hint" id="income-type-hint">${escapeHtml(incomeTypeMeta(initialType).hint)}</p>
       </div>
-      <label class="field"><span>Сумма, ₽</span><input name="amount" data-amount inputmode="decimal" required placeholder="0,00" value="" /></label>
-      <label class="field"><span>Дата</span><input name="date" type="date" required value="${today}" /></label>
+      <label class="field"><span>Сумма, ₽</span><input name="amount" data-amount inputmode="decimal" required placeholder="0,00" value="${existing ? formatAmount(existing.amount) : ""}" /></label>
+      <label class="field"><span>Дата</span><input name="date" type="date" required value="${existing?.date || today}" /></label>
       <label class="field full">
         <span>Компания</span>
         <select name="company" id="income-company" required>
-          <option value="" disabled selected>Выберите компанию</option>
-          ${companies.map((c) => `<option value="${escapeHtml(c.name)}">${escapeHtml(c.name)}</option>`).join("")}
+          <option value="" disabled ${existing?.company ? "" : "selected"}>Выберите компанию</option>
+          ${companies
+            .map(
+              (c) =>
+                `<option value="${escapeHtml(c.name)}" ${existing?.company === c.name ? "selected" : ""}>${escapeHtml(c.name)}</option>`
+            )
+            .join("")}
         </select>
       </label>
       <label class="field full" id="income-from-wrap">
         <span>От кого</span>
-        <input name="fromName" id="income-from" placeholder="Контрагент или плательщик" />
+        <input name="fromName" id="income-from" placeholder="Контрагент или плательщик" value="${escapeHtml(existing?.fromName || "")}" />
       </label>
       <label class="field full" id="income-procedure-wrap">
         <span id="income-procedure-label">Процедура <em class="optional-mark">необязательно</em></span>
         <select name="procedure" id="income-procedure">
           <option value="">Не указано</option>
-          ${procedures.map((p) => `<option value="${escapeHtml(p.name)}">${escapeHtml(p.name)}${p.debtor ? ` · ${escapeHtml(p.debtor)}` : ""}</option>`).join("")}
+          ${procedures
+            .map(
+              (p) =>
+                `<option value="${escapeHtml(p.name)}" ${existing?.procedure === p.name ? "selected" : ""}>${escapeHtml(p.name)}${p.debtor ? ` · ${escapeHtml(p.debtor)}` : ""}</option>`
+            )
+            .join("")}
         </select>
       </label>
       <label class="field full" id="income-purpose-wrap">
         <span id="income-purpose-label">Основание / за что</span>
-        <input name="purpose" id="income-purpose" required placeholder="Например, оплата услуг" />
+        <input name="purpose" id="income-purpose" required placeholder="Например, оплата услуг" value="${escapeHtml(existing?.purpose || "")}" />
       </label>
       <label class="field full">
         <span>Комментарий <em class="optional-mark">необязательно</em></span>
-        <input name="note" placeholder="Дополнительные сведения" />
+        <input name="note" placeholder="Дополнительные сведения" value="${escapeHtml(existing?.note || "")}" />
       </label>
     </form>
-    <div class="modal-actions">
+    <div class="modal-actions modal-actions-fill">
       <button type="button" class="btn btn-secondary" data-close>Отмена</button>
-      <button type="submit" form="income-form" class="btn btn-primary">Сохранить</button>
+      ${
+        existing
+          ? `<button type="button" class="btn btn-danger" id="btn-delete-income-draft">Удалить черновик</button>`
+          : ""
+      }
+      <button type="button" class="btn btn-secondary" id="btn-save-income-draft">Сохранить черновик</button>
+      <button type="button" class="btn btn-primary" id="btn-submit-income">Отправить на проверку</button>
     </div>
   `);
 
@@ -3117,15 +3224,19 @@ function openMyIncomeModal() {
   document.querySelectorAll("[data-income-type]").forEach((btn) => {
     btn.addEventListener("click", () => syncTypeUi(btn.dataset.incomeType));
   });
-  syncTypeUi("counterparty");
+  syncTypeUi(initialType);
 
-  document.getElementById("income-form").addEventListener("submit", (e) => {
-    e.preventDefault();
-    const fd = new FormData(e.target);
+  const readValidated = () => {
+    const form = document.getElementById("income-form");
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return null;
+    }
+    const fd = new FormData(form);
     const amount = parseAmount(fd.get("amount"));
     if (!Number.isFinite(amount) || amount <= 0) {
       showAlert("Укажите сумму с двумя знаками после запятой, например 35 000,00", "Проверьте сумму");
-      return;
+      return null;
     }
 
     const type = String(fd.get("type") || "other");
@@ -3138,25 +3249,22 @@ function openMyIncomeModal() {
 
     if (!company) {
       showAlert("Укажите компанию — приход должен относиться к бизнесу.", "Проверьте данные");
-      return;
+      return null;
     }
     if (meta.fromRequired && !fromName) {
       showAlert("Укажите, от кого приняты деньги.", "Проверьте данные");
-      return;
+      return null;
     }
     if (meta.procedureRequired && !procedure) {
       showAlert("Для поступления по процедуре выберите процедуру.", "Проверьте данные");
-      return;
+      return null;
     }
     if (!purpose) {
       showAlert(`Заполните поле «${meta.purposeLabel}».`, "Проверьте данные");
-      return;
+      return null;
     }
 
-    const nextId = state.userIncomes.reduce((m, r) => Math.max(m, Number(r.id) || 0), 300) + 1;
-    const row = normalizeUserIncome({
-      id: nextId,
-      userId: currentUserId(),
+    return {
       amount,
       date: String(fd.get("date")),
       type: meta.id,
@@ -3165,20 +3273,291 @@ function openMyIncomeModal() {
       purpose,
       procedure: meta.id === "asset_sale" ? "" : procedure,
       note,
-      status: "Активна",
-    });
-    state.userIncomes.unshift(row);
-    logActivity({
-      action: "create",
-      entity: "income",
-      entityLabel: `Приход № ${row.id}`,
-      detail: `${incomeTypeLabel(row)} · ${row.company}${row.fromName ? ` · от ${row.fromName}` : ""} · ${row.purpose} · ${money(row.amount)}`,
-    });
+    };
+  };
+
+  const save = (status) => {
+    const data = readValidated();
+    if (!data) return;
+
+    if (existing) {
+      Object.assign(existing, data, {
+        status,
+        reviewComment: status === "На проверке" ? "" : existing.reviewComment,
+      });
+      normalizeUserIncome(existing);
+      logActivity({
+        action: status === "На проверке" ? "submit" : "update",
+        entity: "income",
+        entityLabel: `Приход № ${existing.id}`,
+        detail:
+          status === "На проверке"
+            ? `Приход отправлен на проверку (${money(existing.amount)}): ${incomeTypeLabel(existing)} · ${existing.purpose}`
+            : `Черновик прихода № ${existing.id} сохранён`,
+      });
+    } else {
+      const nextId = state.userIncomes.reduce((m, r) => Math.max(m, Number(r.id) || 0), 300) + 1;
+      const row = normalizeUserIncome({
+        id: nextId,
+        userId: currentUserId(),
+        ...data,
+        status,
+        reviewComment: "",
+      });
+      state.userIncomes.unshift(row);
+      logActivity({
+        action: status === "На проверке" ? "submit" : "create",
+        entity: "income",
+        entityLabel: `Приход № ${row.id}`,
+        detail:
+          status === "На проверке"
+            ? `Приход создан и отправлен на проверку (${money(row.amount)}): ${incomeTypeLabel(row)} · ${row.purpose}`
+            : `Создан черновик прихода № ${row.id} (${money(row.amount)})`,
+      });
+    }
+
     closeModal();
     state.page = "funds";
     renderNav();
     render();
+  };
+
+  document.getElementById("btn-save-income-draft").addEventListener("click", () => save("Черновик"));
+  document.getElementById("btn-submit-income").addEventListener("click", () => save("На проверке"));
+  document.getElementById("btn-delete-income-draft")?.addEventListener("click", async () => {
+    if (!existing || existing.status !== "Черновик") return;
+    const ok = await showConfirm(
+      `Удалить черновик прихода № ${existing.id}?\n\nЭто действие нельзя отменить.`,
+      "Удаление черновика"
+    );
+    if (!ok) return;
+    const idx = state.userIncomes.findIndex((x) => x.id === existing.id);
+    if (idx >= 0) state.userIncomes.splice(idx, 1);
+    logActivity({
+      action: "delete",
+      entity: "income",
+      entityLabel: `Приход № ${existing.id}`,
+      detail: `Удалён черновик прихода № ${existing.id}`,
+    });
+    closeModal();
+    renderFunds();
   });
+}
+
+function openIncomeModal(id) {
+  const row = state.userIncomes.find((x) => x.id === Number(id));
+  if (!row) return;
+  normalizeUserIncome(row);
+
+  if (state.role === "user" && canUserEditIncome(row) && row.userId === currentUserId()) {
+    return openMyIncomeModal(id);
+  }
+
+  const isAdminReview = state.role === "admin" && row.status === "На проверке";
+  const canWithdraw = state.role === "user" && row.userId === currentUserId() && row.status === "На проверке";
+  const sub = [row.fromName ? `от: ${row.fromName}` : "", row.procedure ? `процедура: ${row.procedure}` : ""]
+    .filter(Boolean)
+    .join(" · ");
+
+  showModal(`
+    <h3>Приход № ${row.id}</h3>
+    <div class="report-meta">${badge(row.status)} <span class="muted-inline">${escapeHtml(incomeTypeLabel(row))}</span></div>
+    <div class="form-grid report-view">
+      <div class="field"><span>Автор</span><div class="readonly">${escapeHtml(incomeAuthorName(row))}</div></div>
+      <div class="field"><span>Дата</span><div class="readonly">${formatDate(row.date)}</div></div>
+      <div class="field"><span>Сумма</span><div class="readonly money">${money(row.amount)}</div></div>
+      <div class="field"><span>Компания</span><div class="readonly">${escapeHtml(row.company || "—")}</div></div>
+      <div class="field full"><span>Основание</span><div class="readonly">${escapeHtml(row.purpose || "—")}${sub ? `<div class="dict-sub" style="margin-top:4px">${escapeHtml(sub)}</div>` : ""}</div></div>
+      <div class="field full"><span>Комментарий</span><div class="readonly">${escapeHtml(row.note || "—")}</div></div>
+      ${
+        row.reviewComment
+          ? `<div class="field full"><span>Комментарий проверки</span><div class="readonly rework-box">${escapeHtml(row.reviewComment)}</div></div>`
+          : ""
+      }
+      ${
+        isAdminReview
+          ? `<label class="field full"><span>Комментарий при отклонении <em class="optional-mark">нужен только для отклонения</em></span>
+              <textarea id="income-review-comment" rows="3" placeholder="Почему приход отклонён"></textarea>
+            </label>`
+          : ""
+      }
+    </div>
+    <div class="modal-actions modal-actions-split">
+      <button type="button" class="btn btn-secondary" data-close>Закрыть</button>
+      <div class="modal-actions-right">
+        ${
+          isAdminReview
+            ? `<button type="button" class="btn btn-danger" id="btn-reject-income">Отклонить</button>
+               <button type="button" class="btn btn-primary" id="btn-accept-income">Принять</button>`
+            : ""
+        }
+        ${
+          canWithdraw
+            ? `<button type="button" class="btn btn-secondary" id="btn-withdraw-income">Отозвать с проверки</button>`
+            : ""
+        }
+      </div>
+    </div>
+  `);
+
+  document.getElementById("btn-accept-income")?.addEventListener("click", () => {
+    row.status = "Принят";
+    row.reviewComment = "";
+    logActivity({
+      action: "accept",
+      entity: "income",
+      entityLabel: `Приход № ${row.id}`,
+      detail: `Приход принят (${money(row.amount)}): ${incomeAuthorName(row)} · ${row.purpose}`,
+    });
+    closeModal();
+    render();
+  });
+
+  document.getElementById("btn-reject-income")?.addEventListener("click", async () => {
+    const comment = (document.getElementById("income-review-comment")?.value || "").trim();
+    if (!comment) {
+      showAlert("Укажите причину отклонения.", "Нужен комментарий");
+      return;
+    }
+    const ok = await showConfirm(
+      `Отклонить приход № ${row.id}?\n\nПользователь увидит причину. Доработка этого прихода не предусмотрена — при необходимости нужно создать новый.`,
+      "Отклонить приход"
+    );
+    if (!ok) return;
+    row.status = "Отклонён";
+    row.reviewComment = comment;
+    logActivity({
+      action: "reject",
+      entity: "income",
+      entityLabel: `Приход № ${row.id}`,
+      detail: `Приход отклонён (${money(row.amount)}): ${incomeAuthorName(row)} · ${row.purpose}`,
+    });
+    closeModal();
+    render();
+  });
+
+  document.getElementById("btn-withdraw-income")?.addEventListener("click", async () => {
+    const ok = await showConfirm(
+      `Отозвать приход № ${row.id} с проверки?\n\nОн вернётся в черновики — можно править и отправить снова.`,
+      "Отзыв прихода"
+    );
+    if (!ok) return;
+    row.status = "Черновик";
+    logActivity({
+      action: "withdraw",
+      entity: "income",
+      entityLabel: `Приход № ${row.id}`,
+      detail: `Приход отозван с проверки`,
+    });
+    closeModal();
+    renderFunds();
+  });
+}
+
+function renderIncomesAdmin() {
+  setTitle("Приходы");
+  const rows = adminIncomes();
+  const awaiting = incomesAwaitingReview().length;
+  const companies = [...new Set(rows.map((r) => r.company).filter(Boolean))].sort((a, b) => a.localeCompare(b, "ru"));
+
+  els.content.innerHTML = `
+    <div class="workflow-hint card soft">
+      <strong>Согласование приходов.</strong>
+      Пользователь регистрирует приход и отправляет на проверку → вы принимаете или отклоняете с комментарием.
+      Доработка не используется: при отклонении пользователь создаёт новый приход.
+      Сейчас на проверке: <strong>${awaiting}</strong>
+    </div>
+    <div class="filters-bar">
+      <div class="search-wrap filters-search">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <input class="search" id="income-admin-search" placeholder="Поиск по автору, основанию или №..." />
+      </div>
+      <select id="income-admin-status" class="filter-select" title="Статус">
+        <option value="all" selected>Все статусы</option>
+        <option value="На проверке">На проверке</option>
+        <option value="Принят">Принят</option>
+        <option value="Отклонён">Отклонён</option>
+        <option value="Архив">Архив</option>
+      </select>
+      <select id="income-admin-company" class="filter-select" title="Компания">
+        <option value="all">Все компании</option>
+        ${companies.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("")}
+      </select>
+      <button type="button" class="btn btn-secondary btn-sm filters-reset" id="income-admin-clear">Снять все фильтры</button>
+    </div>
+    <div class="table-wrap">
+      <table class="data">
+        <thead>
+          <tr>
+            <th>№</th><th>Дата</th><th>Автор</th><th>Тип</th><th>Компания</th><th>Основание</th><th>Сумма</th><th>Статус</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="income-admin-body"></tbody>
+      </table>
+    </div>
+  `;
+
+  const paint = () => {
+    const q = document.getElementById("income-admin-search").value.toLowerCase().trim();
+    const status = document.getElementById("income-admin-status").value;
+    const company = document.getElementById("income-admin-company").value;
+    let list = adminIncomes().slice();
+    if (status !== "all") list = list.filter((r) => r.status === status);
+    if (company !== "all") list = list.filter((r) => r.company === company);
+    if (q) {
+      list = list.filter(
+        (r) =>
+          String(r.id).includes(q) ||
+          incomeAuthorName(r).toLowerCase().includes(q) ||
+          (r.purpose || "").toLowerCase().includes(q) ||
+          (r.company || "").toLowerCase().includes(q) ||
+          incomeTypeLabel(r).toLowerCase().includes(q) ||
+          (r.fromName || "").toLowerCase().includes(q)
+      );
+    }
+
+    document.getElementById("income-admin-body").innerHTML = list.length
+      ? list
+          .map((r) => {
+            const sub = [r.fromName ? `от: ${r.fromName}` : "", r.procedure ? `процедура: ${r.procedure}` : ""]
+              .filter(Boolean)
+              .join(" · ");
+            return `<tr>
+              <td>${r.id}</td>
+              <td>${formatDate(r.date)}</td>
+              <td>${escapeHtml(incomeAuthorName(r))}</td>
+              <td>${escapeHtml(incomeTypeLabel(r))}</td>
+              <td>${escapeHtml(r.company || "—")}</td>
+              <td>
+                <div class="dict-primary">
+                  <div class="dict-name">${escapeHtml(r.purpose || "—")}</div>
+                  ${sub ? `<div class="dict-sub">${escapeHtml(sub)}</div>` : ""}
+                </div>
+              </td>
+              <td class="money">${money(r.amount)}</td>
+              <td>${badge(r.status)}</td>
+              <td><button type="button" class="btn btn-secondary btn-sm" data-open-income="${r.id}">Открыть</button></td>
+            </tr>`;
+          })
+          .join("")
+      : `<tr><td colspan="9" class="empty">${rows.length ? "Ничего не найдено" : "Приходов на проверке пока нет"}</td></tr>`;
+
+    document.querySelectorAll("[data-open-income]").forEach((btn) => {
+      btn.addEventListener("click", () => openIncomeModal(btn.dataset.openIncome));
+    });
+  };
+
+  document.getElementById("income-admin-search").addEventListener("input", paint);
+  ["income-admin-status", "income-admin-company"].forEach((id) => {
+    document.getElementById(id).addEventListener("change", paint);
+  });
+  document.getElementById("income-admin-clear").addEventListener("click", () => {
+    document.getElementById("income-admin-search").value = "";
+    document.getElementById("income-admin-status").value = "all";
+    document.getElementById("income-admin-company").value = "all";
+    paint();
+  });
+  paint();
 }
 
 function paintFundsIncomeTable() {
@@ -3186,18 +3565,21 @@ function paintFundsIncomeTable() {
   const fromEl = document.getElementById("income-filter-from");
   const toEl = document.getElementById("income-filter-to");
   const typeEl = document.getElementById("income-filter-type");
+  const statusEl = document.getElementById("income-filter-status");
   const body = document.getElementById("income-body");
-  if (!searchEl || !fromEl || !toEl || !typeEl || !body) return;
+  if (!searchEl || !fromEl || !toEl || !typeEl || !statusEl || !body) return;
 
   const q = searchEl.value.toLowerCase().trim();
   const from = fromEl.value;
   const to = toEl.value;
   const type = typeEl.value;
+  const status = statusEl.value;
 
   let list = myIncomes();
   if (from) list = list.filter((r) => r.date >= from);
   if (to) list = list.filter((r) => r.date <= to);
   if (type !== "all") list = list.filter((r) => r.type === type);
+  if (status !== "all") list = list.filter((r) => r.status === status);
   if (q) {
     list = list.filter(
       (r) =>
@@ -3215,7 +3597,7 @@ function paintFundsIncomeTable() {
     : `<tr><td colspan="9" class="empty">${
         myIncomes().length
           ? "Ничего не найдено по выбранным условиям"
-          : "Приходов пока нет — зарегистрируйте первое поступление денег бизнеса"
+          : "Приходов пока нет — зарегистрируйте первое поступление и отправьте на проверку"
       }</td></tr>`;
   bindUserIncomeArchiveActions();
 }
@@ -3436,24 +3818,26 @@ function renderFunds() {
           </span>
         </div>
         <div class="funds-collapse-body" id="funds-receipts-body">
-          <div class="filters-bar">
+          <div class="filters-stack">
             <div class="search-wrap filters-search">
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-              <input class="search" id="receipts-search" placeholder="Поиск" inputmode="numeric" />
+              <input class="search" id="receipts-search" placeholder="Поиск по № поступления" inputmode="numeric" autocomplete="off" />
             </div>
-            <label class="filter-date"><span>Период с</span><input type="date" id="receipts-filter-from" class="filter-select" value="" /></label>
-            <label class="filter-date"><span>по</span><input type="date" id="receipts-filter-to" class="filter-select" value="" /></label>
-            <select id="receipts-filter-purpose" class="filter-select" title="Назначение">
-              <option value="all" selected>Все назначения</option>
-              ${purposes.map((p) => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join("")}
-            </select>
-            <select id="receipts-filter-scope" class="filter-select" title="Статус">
-              <option value="active" selected>Активные</option>
-              <option value="archive">Архив</option>
-            </select>
-            <label class="filter-date filter-amount"><span>Сумма от</span><input type="text" id="receipts-filter-amount-from" class="filter-select" inputmode="decimal" placeholder="—" /></label>
-            <label class="filter-date filter-amount"><span>до</span><input type="text" id="receipts-filter-amount-to" class="filter-select" inputmode="decimal" placeholder="—" /></label>
-            <button type="button" class="btn btn-secondary btn-sm filters-reset" id="receipts-clear-filters">Снять все фильтры</button>
+            <div class="filters-bar">
+              <label class="filter-date"><span>Период с</span><input type="date" id="receipts-filter-from" class="filter-select" value="" /></label>
+              <label class="filter-date"><span>по</span><input type="date" id="receipts-filter-to" class="filter-select" value="" /></label>
+              <select id="receipts-filter-purpose" class="filter-select" title="Назначение">
+                <option value="all" selected>Все назначения</option>
+                ${purposes.map((p) => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join("")}
+              </select>
+              <select id="receipts-filter-scope" class="filter-select" title="Статус">
+                <option value="active" selected>Активные</option>
+                <option value="archive">Архив</option>
+              </select>
+              <label class="filter-date filter-amount"><span>Сумма от</span><input type="text" id="receipts-filter-amount-from" class="filter-select" inputmode="decimal" placeholder="—" /></label>
+              <label class="filter-date filter-amount"><span>до</span><input type="text" id="receipts-filter-amount-to" class="filter-select" inputmode="decimal" placeholder="—" /></label>
+              <button type="button" class="btn btn-secondary btn-sm filters-reset" id="receipts-clear-filters">Снять все фильтры</button>
+            </div>
           </div>
           <div class="list-cards" id="receipts-list"></div>
         </div>
@@ -3464,8 +3848,8 @@ function renderFunds() {
           <button type="button" class="funds-collapse-toggle" id="funds-income-toggle" aria-expanded="true" aria-controls="funds-income-body">
             <span class="icon">${icons.inflow}</span>
             <span class="funds-collapse-copy">
-              <strong>Принятые поступления</strong>
-              <span class="funds-block-hint">Деньги бизнеса, которые вы приняли. Личные доходы здесь не учитываются</span>
+              <strong>Приходы</strong>
+              <span class="funds-block-hint">Черновик → на проверку → администратор примет или отклонит. В сводках учитываются только принятые</span>
             </span>
           </button>
           <div class="funds-block-aside">
@@ -3476,18 +3860,28 @@ function renderFunds() {
           </span>
         </div>
         <div class="funds-collapse-body" id="funds-income-body">
-          <div class="filters-bar">
+          <div class="filters-stack">
             <div class="search-wrap filters-search">
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-              <input class="search" id="income-search" placeholder="Поиск" />
+              <input class="search" id="income-search" placeholder="Поиск по основанию, компании или комментарию" autocomplete="off" />
             </div>
-            <label class="filter-date"><span>Период с</span><input type="date" id="income-filter-from" class="filter-select" value="" /></label>
-            <label class="filter-date"><span>по</span><input type="date" id="income-filter-to" class="filter-select" value="" /></label>
-            <select id="income-filter-type" class="filter-select" title="Тип прихода">
-              <option value="all" selected>Все типы</option>
-              ${incomeTypes.map((t) => `<option value="${t.id}">${escapeHtml(t.label)}</option>`).join("")}
-            </select>
-            <button type="button" class="btn btn-secondary btn-sm filters-reset" id="income-clear-filters">Снять все фильтры</button>
+            <div class="filters-bar">
+              <label class="filter-date"><span>Период с</span><input type="date" id="income-filter-from" class="filter-select" value="" /></label>
+              <label class="filter-date"><span>по</span><input type="date" id="income-filter-to" class="filter-select" value="" /></label>
+              <select id="income-filter-type" class="filter-select" title="Тип прихода">
+                <option value="all" selected>Все типы</option>
+                ${incomeTypes.map((t) => `<option value="${t.id}">${escapeHtml(t.label)}</option>`).join("")}
+              </select>
+              <select id="income-filter-status" class="filter-select" title="Статус">
+                <option value="all" selected>Все статусы</option>
+                <option value="Черновик">Черновик</option>
+                <option value="На проверке">На проверке</option>
+                <option value="Принят">Принят</option>
+                <option value="Отклонён">Отклонён</option>
+                <option value="Архив">Архив</option>
+              </select>
+              <button type="button" class="btn btn-secondary btn-sm filters-reset" id="income-clear-filters">Снять все фильтры</button>
+            </div>
           </div>
           <div class="table-wrap">
             <table class="data">
@@ -3505,7 +3899,7 @@ function renderFunds() {
   `;
 
   document.getElementById("income-search").addEventListener("input", paintFundsIncomeTable);
-  ["income-filter-from", "income-filter-to", "income-filter-type"].forEach((id) => {
+  ["income-filter-from", "income-filter-to", "income-filter-type", "income-filter-status"].forEach((id) => {
     document.getElementById(id).addEventListener("change", paintFundsIncomeTable);
   });
   document.getElementById("income-clear-filters").addEventListener("click", () => {
@@ -3513,9 +3907,10 @@ function renderFunds() {
     document.getElementById("income-filter-from").value = "";
     document.getElementById("income-filter-to").value = "";
     document.getElementById("income-filter-type").value = "all";
+    document.getElementById("income-filter-status").value = "all";
     paintFundsIncomeTable();
   });
-  document.getElementById("btn-new-income").addEventListener("click", openMyIncomeModal);
+  document.getElementById("btn-new-income").addEventListener("click", () => openMyIncomeModal());
 
   document.getElementById("receipts-search").addEventListener("input", paintFundsReceiptsList);
   ["receipts-filter-from", "receipts-filter-to", "receipts-filter-purpose", "receipts-filter-scope"].forEach((id) => {
