@@ -4078,33 +4078,37 @@ function renderReportSummary() {
       <div class="card stat"><div class="label">На проверке</div><div class="value">${inReview}</div></div>
       <div class="card stat"><div class="label">Утверждено</div><div class="value">${approved}</div></div>
     </div>
-    <div class="filters-bar">
+    <div class="filters-stack">
       <div class="search-wrap filters-search">
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-        <input class="search" id="rs-search" placeholder="Поиск по №, названию или компании..." />
+        <input class="search" id="rs-search" placeholder="Поиск по №, названию или компании..." autocomplete="off" />
       </div>
-      <label class="filter-date"><span>Период с</span><input type="date" id="rs-from" class="filter-select" value="" /></label>
-      <label class="filter-date"><span>по</span><input type="date" id="rs-to" class="filter-select" value="" /></label>
-      <select id="rs-status" class="filter-select" title="Статус">
-        <option value="all" selected>Все статусы</option>
-        <option value="Черновик">Черновик</option>
-        <option value="На проверке">На проверке</option>
-        <option value="На доработке">На доработке</option>
-        <option value="Утверждён">Утверждён</option>
-        <option value="Выплачено">Выплачено</option>
-        <option value="Отклонён">Отклонён</option>
-      </select>
-      <select id="rs-company" class="filter-select" title="Компания">
-        <option value="all" selected>Все компании</option>
-        ${companies.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("")}
-      </select>
-      <select id="rs-purpose" class="filter-select" title="Назначение">
-        <option value="all" selected>Все назначения</option>
-        ${purposes.map((p) => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join("")}
-      </select>
-      <div class="filters-actions">
-        <button type="button" class="btn btn-secondary btn-sm filters-reset" id="rs-clear">Снять все фильтры</button>
-        <button type="button" class="btn btn-primary btn-sm" id="rs-create" data-go="my-reports">К созданию</button>
+      <div class="filters-bar">
+        <div class="filter-date-range">
+          <label class="filter-date"><span>Период с</span><input type="date" id="rs-from" class="filter-select" value="" /></label>
+          <label class="filter-date"><span>по</span><input type="date" id="rs-to" class="filter-select" value="" /></label>
+        </div>
+        <select id="rs-status" class="filter-select" title="Статус">
+          <option value="all" selected>Все статусы</option>
+          <option value="Черновик">Черновик</option>
+          <option value="На проверке">На проверке</option>
+          <option value="На доработке">На доработке</option>
+          <option value="Утверждён">Утверждён</option>
+          <option value="Выплачено">Выплачено</option>
+          <option value="Отклонён">Отклонён</option>
+        </select>
+        <select id="rs-company" class="filter-select" title="Компания">
+          <option value="all" selected>Все компании</option>
+          ${companies.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("")}
+        </select>
+        <select id="rs-purpose" class="filter-select" title="Назначение">
+          <option value="all" selected>Все назначения</option>
+          ${purposes.map((p) => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join("")}
+        </select>
+        <div class="filters-actions">
+          <button type="button" class="btn btn-secondary btn-sm filters-reset" id="rs-clear">Снять все фильтры</button>
+          <button type="button" class="btn btn-primary btn-sm" id="rs-create" data-go="my-reports">К созданию</button>
+        </div>
       </div>
     </div>
     <div class="table-wrap">
