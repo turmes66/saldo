@@ -1060,8 +1060,7 @@ button.card-link:hover {
 }
 
 .table-wrap {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow: hidden;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: #fff;
@@ -1072,37 +1071,40 @@ button.card-link:hover {
 
 table.data {
   width: 100%;
-  min-width: 720px;
-  max-width: none;
+  min-width: 0;
+  max-width: 100%;
   border-collapse: collapse;
-  font-size: 0.9rem;
-  table-layout: auto;
+  table-layout: fixed;
+  font-size: clamp(0.72rem, 0.62rem + 0.4vw, 0.9rem);
 }
 
 table.data th,
 table.data td {
-  padding: 12px 10px;
+  padding: clamp(6px, 0.4vw + 4px, 12px) clamp(4px, 0.35vw + 2px, 10px);
   text-align: left;
   border-bottom: 1px solid var(--line);
   vertical-align: middle;
   overflow-wrap: anywhere;
-  word-break: normal;
-  white-space: nowrap;
+  word-break: break-word;
+  white-space: normal;
+  min-width: 0;
 }
 
 table.data .dict-primary,
 table.data .dict-name,
 table.data .dict-sub {
   white-space: normal;
+  min-width: 0;
+  max-width: none;
 }
 
 table.data .dict-primary {
-  min-width: 140px;
-  max-width: 280px;
+  min-width: 0;
+  max-width: none;
 }
 
 table.data th {
-  font-size: 0.75rem;
+  font-size: clamp(0.65rem, 0.58rem + 0.25vw, 0.75rem);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--muted);
@@ -1113,11 +1115,15 @@ table.data .money,
 table.data td.money {
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
+  font-size: inherit;
 }
 
 table.data .badge {
-  white-space: nowrap;
+  white-space: normal;
   max-width: 100%;
+  justify-content: center;
+  text-align: center;
+  line-height: 1.2;
 }
 
 table.data tr:last-child td {
@@ -1132,24 +1138,12 @@ table.data tbody tr:hover {
   background: #f6faf7;
 }
 
-@media (max-width: 1100px) {
-  table.data {
-    font-size: 0.82rem;
-    min-width: 640px;
-  }
-
-  table.data th,
-  table.data td {
-    padding: 10px 8px;
-  }
-}
-
 .badge {
   display: inline-flex;
   align-items: center;
   padding: 4px 10px;
   border-radius: 999px;
-  font-size: 0.75rem;
+  font-size: clamp(0.68rem, 0.62rem + 0.2vw, 0.75rem);
   font-weight: 700;
 }
 
@@ -1200,38 +1194,36 @@ table.data tbody tr:hover {
 
 .filters-bar {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   gap: 10px;
   align-items: stretch;
   margin-bottom: 16px;
   width: 100%;
   max-width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: 2px;
+  overflow: visible;
 }
 
 .filters-search {
-  flex: 1 1 220px;
-  min-width: 160px;
+  flex: 2 1 180px;
+  min-width: 0;
 }
 
 .filters-bar .filter-select,
 .filters-bar .btn {
   box-sizing: border-box;
-  height: 40px;
   min-height: 40px;
-  padding: 0 14px;
+  height: auto;
+  padding: 8px 12px;
   border-radius: 12px;
-  font-size: 0.85rem;
+  font-size: clamp(0.75rem, 0.7rem + 0.25vw, 0.85rem);
   font-weight: 600;
-  line-height: 1;
+  line-height: 1.2;
 }
 
 .filters-bar .filter-select {
-  flex: 1 1 140px;
+  flex: 1 1 110px;
   width: auto;
-  min-width: 120px;
+  min-width: 0;
   max-width: none;
 }
 
@@ -1239,26 +1231,33 @@ table.data tbody tr:hover {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  white-space: nowrap;
-  flex: 0 0 auto;
+  white-space: normal;
+  flex: 1 1 120px;
+  min-width: 0;
+  text-align: center;
 }
 
 .filters-actions {
   display: flex;
-  flex-wrap: nowrap;
-  align-items: center;
+  flex-wrap: wrap;
+  align-items: stretch;
   gap: 10px;
-  margin-left: auto;
-  flex: 0 0 auto;
+  margin-left: 0;
+  flex: 1 1 160px;
+  min-width: 0;
+}
+
+.filters-actions .btn {
+  flex: 1 1 0;
 }
 
 .filters-reset {
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .filters-bar > .filters-reset {
-  margin-left: auto;
-  flex: 0 0 auto;
+  margin-left: 0;
+  flex: 1 1 140px;
 }
 
 .filter-date {
@@ -1266,10 +1265,10 @@ table.data tbody tr:hover {
   align-items: center;
   gap: 6px;
   color: var(--muted);
-  font-size: 0.85rem;
+  font-size: clamp(0.75rem, 0.7rem + 0.25vw, 0.85rem);
   font-weight: 600;
-  flex: 1 1 150px;
-  min-width: 150px;
+  flex: 1 1 140px;
+  min-width: 0;
   white-space: nowrap;
 }
 
@@ -1288,8 +1287,8 @@ table.data tbody tr:hover {
 }
 
 .filter-amount {
-  flex: 1 1 120px;
-  min-width: 120px;
+  flex: 1 1 110px;
+  min-width: 0;
 }
 
 .filter-amount .filter-select {
@@ -1300,16 +1299,25 @@ table.data tbody tr:hover {
 
 .modal-actions {
   display: flex;
-  justify-content: flex-end;
-  flex-wrap: nowrap;
+  justify-content: stretch;
+  flex-wrap: wrap;
   gap: 10px;
   margin-top: 18px;
   width: 100%;
 }
 
+.modal-actions .btn {
+  flex: 1 1 120px;
+  min-width: 0;
+  justify-content: center;
+  text-align: center;
+  white-space: normal;
+  line-height: 1.25;
+}
+
 .modal-actions-fill {
   justify-content: stretch;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
 }
 
 .modal-actions-fill .btn {
@@ -1324,53 +1332,26 @@ table.data tbody tr:hover {
 }
 
 @media (max-width: 720px) {
-  .filters-bar {
-    flex-wrap: wrap;
-    overflow-x: visible;
-  }
-
   .filters-search {
     flex: 1 1 100%;
-    min-width: 0;
   }
 
   .filters-bar .filter-select,
   .filter-date,
-  .filter-amount {
-    flex: 1 1 calc(50% - 5px);
-    min-width: calc(50% - 5px);
-    max-width: none;
-  }
-
+  .filter-amount,
   .filters-bar > .filters-reset,
   .filters-actions {
-    margin-left: 0;
-    flex: 1 1 100%;
-  }
-
-  .filters-bar > .filters-reset,
-  .filters-actions .btn {
-    width: 100%;
-  }
-
-  .modal-actions,
-  .modal-actions-fill {
-    flex-wrap: wrap;
-  }
-
-  .modal-actions-fill .btn {
     flex: 1 1 calc(50% - 5px);
   }
 }
 
-@media (max-width: 560px) {
+@media (max-width: 480px) {
   .filters-bar .filter-select,
   .filter-date,
-  .filter-amount {
-    flex: 1 1 100%;
-    min-width: 0;
-  }
-
+  .filter-amount,
+  .filters-bar > .filters-reset,
+  .filters-actions,
+  .modal-actions .btn,
   .modal-actions-fill .btn {
     flex: 1 1 100%;
   }
@@ -2203,7 +2184,7 @@ table.data tbody tr:hover {
   background: #fff;
   border: 1px solid var(--line);
   border-radius: 16px;
-  overflow: auto;
+  overflow: hidden;
   box-shadow: 0 8px 24px rgba(28, 51, 40, 0.04);
   width: 100%;
   max-width: 100%;
@@ -2211,25 +2192,31 @@ table.data tbody tr:hover {
 
 table.users-table {
   width: 100%;
-  min-width: 720px;
+  min-width: 0;
+  max-width: 100%;
   border-collapse: collapse;
-  font-size: 0.92rem;
+  table-layout: fixed;
+  font-size: clamp(0.75rem, 0.68rem + 0.35vw, 0.92rem);
 }
 
 table.users-table th,
 table.users-table td {
-  padding: 16px 18px;
+  padding: clamp(8px, 0.5vw + 6px, 16px) clamp(6px, 0.4vw + 4px, 18px);
   text-align: left;
   border-bottom: 1px solid #edf2ef;
   vertical-align: middle;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  min-width: 0;
 }
 
 table.users-table th {
-  font-size: 0.78rem;
+  font-size: clamp(0.68rem, 0.62rem + 0.2vw, 0.78rem);
   font-weight: 700;
   color: #6b7c73;
   background: #fff;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 table.users-table tbody tr:last-child td {
@@ -2243,11 +2230,11 @@ table.users-table tbody tr:hover {
 .user-cell {
   font-weight: 650;
   color: var(--green-950);
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .phone-cell {
-  white-space: nowrap;
+  white-space: normal;
   font-variant-numeric: tabular-nums;
 }
 
@@ -2256,6 +2243,9 @@ table.users-table tbody tr:hover {
   align-items: center;
   gap: 6px;
   color: var(--text);
+  max-width: 100%;
+  min-width: 0;
+  flex-wrap: wrap;
 }
 
 .email-cell .ok-dot {
@@ -2273,9 +2263,11 @@ table.users-table tbody tr:hover {
   border-radius: 10px;
   padding: 8px 32px 8px 12px;
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: clamp(0.75rem, 0.7rem + 0.2vw, 0.85rem);
   color: var(--green-900);
-  min-width: 150px;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
   cursor: pointer;
 }
 
