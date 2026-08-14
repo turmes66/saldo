@@ -37,6 +37,7 @@ body {
   font-family: var(--font);
   color: var(--text);
   background: var(--surface);
+  overflow-x: hidden;
 }
 
 button,
@@ -44,6 +45,7 @@ input,
 select,
 textarea {
   font: inherit;
+  max-width: 100%;
 }
 
 .hidden {
@@ -320,7 +322,9 @@ textarea {
 .app {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: var(--sidebar-w) 1fr;
+  grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
+  width: 100%;
+  max-width: 100vw;
 }
 
 .sidebar {
@@ -940,6 +944,18 @@ button.card-link:hover {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+@media (max-width: 1100px) {
+  .product-grid-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .product-grid-3 {
+    grid-template-columns: 1fr;
+  }
+}
+
 .product-card {
   border: none;
   border-radius: 16px;
@@ -1056,9 +1072,11 @@ button.card-link:hover {
 
 table.data {
   width: 100%;
-  max-width: 100%;
+  min-width: 720px;
+  max-width: none;
   border-collapse: collapse;
   font-size: 0.9rem;
+  table-layout: auto;
 }
 
 table.data th,
@@ -1067,9 +1085,20 @@ table.data td {
   text-align: left;
   border-bottom: 1px solid var(--line);
   vertical-align: middle;
-  overflow-wrap: break-word;
+  overflow-wrap: anywhere;
   word-break: normal;
+  white-space: nowrap;
+}
+
+table.data .dict-primary,
+table.data .dict-name,
+table.data .dict-sub {
   white-space: normal;
+}
+
+table.data .dict-primary {
+  min-width: 140px;
+  max-width: 280px;
 }
 
 table.data th {
@@ -1106,6 +1135,7 @@ table.data tbody tr:hover {
 @media (max-width: 1100px) {
   table.data {
     font-size: 0.82rem;
+    min-width: 640px;
   }
 
   table.data th,
@@ -1164,20 +1194,26 @@ table.data tbody tr:hover {
   border-radius: 12px;
   padding: 10px 14px;
   background: #fff;
-  min-width: 160px;
+  min-width: 0;
+  width: 100%;
 }
 
 .filters-bar {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 10px;
-  align-items: center;
+  align-items: stretch;
   margin-bottom: 16px;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 2px;
 }
 
 .filters-search {
   flex: 1 1 220px;
-  min-width: 200px;
+  min-width: 160px;
 }
 
 .filters-bar .filter-select,
@@ -1193,10 +1229,10 @@ table.data tbody tr:hover {
 }
 
 .filters-bar .filter-select {
-  flex: 0 1 160px;
-  width: 160px;
-  min-width: 130px;
-  max-width: 170px;
+  flex: 1 1 140px;
+  width: auto;
+  min-width: 120px;
+  max-width: none;
 }
 
 .filters-bar .btn {
@@ -1204,7 +1240,7 @@ table.data tbody tr:hover {
   align-items: center;
   justify-content: center;
   white-space: nowrap;
-  flex-shrink: 0;
+  flex: 0 0 auto;
 }
 
 .filters-actions {
@@ -1213,7 +1249,7 @@ table.data tbody tr:hover {
   align-items: center;
   gap: 10px;
   margin-left: auto;
-  flex-shrink: 0;
+  flex: 0 0 auto;
 }
 
 .filters-reset {
@@ -1222,6 +1258,7 @@ table.data tbody tr:hover {
 
 .filters-bar > .filters-reset {
   margin-left: auto;
+  flex: 0 0 auto;
 }
 
 .filter-date {
@@ -1231,7 +1268,8 @@ table.data tbody tr:hover {
   color: var(--muted);
   font-size: 0.85rem;
   font-weight: 600;
-  flex-shrink: 0;
+  flex: 1 1 150px;
+  min-width: 150px;
   white-space: nowrap;
 }
 
@@ -1241,17 +1279,101 @@ table.data tbody tr:hover {
 }
 
 .filter-date .filter-select {
-  width: 140px;
-  min-width: 130px;
-  max-width: 150px;
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
   color: var(--text);
   font-weight: 600;
 }
 
+.filter-amount {
+  flex: 1 1 120px;
+  min-width: 120px;
+}
+
 .filter-amount .filter-select {
-  width: 110px;
-  min-width: 96px;
-  max-width: 120px;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+  gap: 10px;
+  margin-top: 18px;
+  width: 100%;
+}
+
+.modal-actions-fill {
+  justify-content: stretch;
+  flex-wrap: nowrap;
+}
+
+.modal-actions-fill .btn {
+  flex: 1 1 0;
+  min-width: 0;
+  justify-content: center;
+  text-align: center;
+  white-space: normal;
+  line-height: 1.25;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+@media (max-width: 720px) {
+  .filters-bar {
+    flex-wrap: wrap;
+    overflow-x: visible;
+  }
+
+  .filters-search {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  .filters-bar .filter-select,
+  .filter-date,
+  .filter-amount {
+    flex: 1 1 calc(50% - 5px);
+    min-width: calc(50% - 5px);
+    max-width: none;
+  }
+
+  .filters-bar > .filters-reset,
+  .filters-actions {
+    margin-left: 0;
+    flex: 1 1 100%;
+  }
+
+  .filters-bar > .filters-reset,
+  .filters-actions .btn {
+    width: 100%;
+  }
+
+  .modal-actions,
+  .modal-actions-fill {
+    flex-wrap: wrap;
+  }
+
+  .modal-actions-fill .btn {
+    flex: 1 1 calc(50% - 5px);
+  }
+}
+
+@media (max-width: 560px) {
+  .filters-bar .filter-select,
+  .filter-date,
+  .filter-amount {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  .modal-actions-fill .btn {
+    flex: 1 1 100%;
+  }
 }
 
 .report-card-side {
@@ -1276,40 +1398,6 @@ table.data tbody tr:hover {
   margin-bottom: 14px;
   font-size: 0.9rem;
   line-height: 1.4;
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 18px;
-}
-
-.modal-actions-fill {
-  justify-content: stretch;
-  flex-wrap: nowrap;
-}
-
-.modal-actions-fill .btn {
-  flex: 1 1 0;
-  min-width: 0;
-  justify-content: center;
-  text-align: center;
-  white-space: normal;
-  line-height: 1.25;
-  padding-top: 10px;
-  padding-bottom: 10px;
-}
-
-@media (max-width: 560px) {
-  .modal-actions-fill {
-    flex-wrap: wrap;
-  }
-
-  .modal-actions-fill .btn {
-    flex: 1 1 calc(50% - 5px);
-  }
 }
 
 .modal-actions-split {
@@ -1385,13 +1473,14 @@ table.data tbody tr:hover {
 }
 
 .modal {
-  width: min(640px, 100%);
+  width: min(720px, calc(100vw - 24px));
   background: #fff;
   border-radius: 18px;
   padding: 24px;
   box-shadow: 0 24px 60px rgba(20, 36, 28, 0.2);
   max-height: calc(100vh - 40px);
   overflow: auto;
+  box-sizing: border-box;
 }
 
 .form-grid {
@@ -2114,12 +2203,15 @@ table.data tbody tr:hover {
   background: #fff;
   border: 1px solid var(--line);
   border-radius: 16px;
-  overflow: hidden;
+  overflow: auto;
   box-shadow: 0 8px 24px rgba(28, 51, 40, 0.04);
+  width: 100%;
+  max-width: 100%;
 }
 
 table.users-table {
   width: 100%;
+  min-width: 720px;
   border-collapse: collapse;
   font-size: 0.92rem;
 }
@@ -2250,6 +2342,7 @@ table.users-table tbody tr:hover {
 
 @media (max-width: 1100px) {
   .product-grid,
+  .product-grid-3,
   .grid-4 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -2272,6 +2365,7 @@ table.users-table tbody tr:hover {
   .grid-3,
   .form-grid,
   .product-grid,
+  .product-grid-3,
   .grid-4 {
     grid-template-columns: 1fr;
   }
@@ -2282,5 +2376,11 @@ table.users-table tbody tr:hover {
   }
   .user-meta {
     display: none;
+  }
+  .topbar-user {
+    flex-shrink: 0;
+  }
+  .page-title {
+    font-size: 1.15rem;
   }
 }

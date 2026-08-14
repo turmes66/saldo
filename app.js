@@ -1018,7 +1018,7 @@ function renderUserHome() {
       <div class="section-head">
         <h3><span class="icon">${icons.rocket}</span> Быстрые действия</h3>
       </div>
-      <div class="product-grid" style="grid-template-columns:repeat(3,minmax(0,1fr))">
+      <div class="product-grid product-grid-3">
         <button type="button" class="product-card g1" data-action="new-report">
           <span class="pc-icon">${icons.report}</span>
           <strong>Новый отчёт</strong>
